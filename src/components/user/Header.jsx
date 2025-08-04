@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const Header = ({
   showLoginModal,
   showRegisterModal,
@@ -12,10 +14,10 @@ export const Header = ({
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between py-4">
           <div className="flex items-center mb-4 md:mb-0">
-            <h1 className="text-2xl font-bold text-blue-600">
+            <Link to="/" className="text-2xl font-bold text-blue-600">
               <i className="fas fa-book-open mr-2"></i>
               BookShopVN
-            </h1>
+            </Link>
           </div>
 
           <div className="w-full md:w-1/2 mb-4 md:mb-0">
@@ -37,6 +39,12 @@ export const Header = ({
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700">Xin chào, {username}</span>
+                <Link
+                  to="/admin"
+                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md transition duration-300"
+                >
+                  Admin
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-300"
@@ -73,15 +81,7 @@ export const Header = ({
           <ul className="flex space-x-6 overflow-x-auto pb-2">
             <li>
               <a
-                href="#"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Trang chủ
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
+                href="#moi"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách mới
@@ -89,7 +89,7 @@ export const Header = ({
             </li>
             <li>
               <a
-                href="#"
+                href="#banchay"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách bán chạy
@@ -97,15 +97,7 @@ export const Header = ({
             </li>
             <li>
               <a
-                href="#"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách giảm giá
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
+                href="#thieunhi"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách thiếu nhi
@@ -113,7 +105,7 @@ export const Header = ({
             </li>
             <li>
               <a
-                href="#"
+                href="#ngoaingu"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách ngoại ngữ
@@ -121,7 +113,7 @@ export const Header = ({
             </li>
             <li>
               <a
-                href="#"
+                href="#kinhte"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách kinh tế
@@ -129,10 +121,18 @@ export const Header = ({
             </li>
             <li>
               <a
-                href="#"
+                href="#vanhoc"
                 className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
               >
                 Sách văn học
+              </a>
+            </li>
+            <li>
+              <a
+                href="#trinhtham"
+                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
+              >
+                Sách trinh thám
               </a>
             </li>
           </ul>
