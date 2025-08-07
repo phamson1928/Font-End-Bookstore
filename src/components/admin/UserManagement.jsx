@@ -1,5 +1,7 @@
+import React, { useState } from "react";
+
 export const UserManagement = () => {
-  const users = [
+  const [users, setUsers] = useState([
     {
       id: 1,
       username: "nguyenvana",
@@ -44,7 +46,26 @@ export const UserManagement = () => {
       joinDate: "2024-01-10",
       lastLogin: "2024-01-12",
     },
-  ];
+  ]);
+
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setUsers(users.filter((u) => u.id !== userToDelete.id));
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setUserToDelete(null);
+  };
 
   const getRoleColor = (role) => {
     return role === "admin"
@@ -188,9 +209,6 @@ export const UserManagement = () => {
             <h3 className="text-lg font-semibold text-gray-900">
               Danh sách người dùng
             </h3>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Thêm người dùng
-            </button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -276,17 +294,12 @@ export const UserManagement = () => {
                     {new Date(user.lastLogin).toLocaleDateString("vi-VN")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        Sửa
-                      </button>
-                      <button className="text-green-600 hover:text-green-900">
-                        {user.status === "active" ? "Khóa" : "Mở khóa"}
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
-                        Xóa
-                      </button>
-                    </div>
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDeleteClick(user)}
+                    >
+                      Xóa
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -294,6 +307,35 @@ export const UserManagement = () => {
           </table>
         </div>
       </div>
+
+      {/* Modal xác nhận xóa */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Xác nhận xóa người dùng
+            </h3>
+            <p className="mb-6 text-gray-700">
+              Bạn có chắc chắn muốn xóa người dùng{" "}
+              <b>{userToDelete?.fullName}</b> không?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                onClick={handleCancelDelete}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                onClick={handleConfirmDelete}
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
