@@ -75,6 +75,14 @@ export const BookManagement = () => {
       book.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Handle click outside modal to close
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowAddForm(false);
+      setEditingBook(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -205,8 +213,14 @@ export const BookManagement = () => {
 
       {/* Add/Edit Book Form Modal */}
       {(showAddForm || editingBook) && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50"
+          onClick={handleBackdropClick}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 {editingBook ? "Sửa sách" : "Thêm sách mới"}
