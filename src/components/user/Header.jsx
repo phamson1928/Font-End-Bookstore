@@ -1,4 +1,6 @@
+import React from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../../contexts/CartContext";
 
 export const Header = ({
   showLoginModal,
@@ -9,6 +11,8 @@ export const Header = ({
   username,
   handleLogout,
 }) => {
+  const { getTotalItems } = useCart();
+
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4">
@@ -68,12 +72,17 @@ export const Header = ({
                 </button>
               </>
             )}
-            <button className="relative p-2 text-gray-700 hover:text-blue-600">
+            <Link
+              to="/cart"
+              className="relative p-2 text-gray-700 hover:text-blue-600"
+            >
               <i className="fas fa-shopping-cart text-xl"></i>
-              <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                0
-              </span>
-            </button>
+              {getTotalItems() > 0 && (
+                <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  {getTotalItems()}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
 

@@ -1,11 +1,53 @@
+import React, { useState } from "react";
+import { useCart } from "../../contexts/CartContext";
+
 export const BookDetailModal = ({ isOpen, onClose, book }) => {
   const modalClass = isOpen ? "show" : "hide";
+  const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   if (!book) return null;
+
+  const handleQuantityChange = (change) => {
+    const newQuantity = quantity + change;
+    if (newQuantity >= 1 && newQuantity <= 99) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const handleQuantityInput = (e) => {
+    const value = parseInt(e.target.value) || 1;
+    if (value >= 1 && value <= 99) {
+      setQuantity(value);
+    }
+  };
+
+  const handleAddToCart = () => {
+    addToCart(book, quantity);
+    // Show success message
+    alert(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng!`);
+  };
+
+  const handleBuyNow = () => {
+    addToCart(book, quantity);
+    alert(
+      `Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng! Chuyển đến trang thanh toán...`
+    );
+    // Here you would typically redirect to checkout page
+    onClose();
+  };
+
+  const handleBackdropClick = (e) => {
+    // Only close if clicking the backdrop, not the modal content
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
     <div
       className={`modal fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-40 ${modalClass}`}
+      onClick={handleBackdropClick}
     >
       <div className="modal-content bg-white  w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
@@ -28,13 +70,62 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
               />
 
               <div className="mt-6 space-y-4">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
-                  <i className="fas fa-shopping-cart mr-2"></i> Thêm vào giỏ
-                  hàng
+                {/* Quantity Selector */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Số lượng:
+                  </label>
+                  <div className="flex items-center justify-center space-x-3">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                    >
+                      <i className="fas fa-minus text-sm"></i>
+                    </button>
+
+                    <input
+                      type="number"
+                      min="1"
+                      max="99"
+                      value={quantity}
+                      onChange={handleQuantityInput}
+                      className="w-16 h-10 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={quantity >= 99}
+                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                    >
+                      <i className="fas fa-plus text-sm"></i>
+                    </button>
+                  </div>
+
+                  <div className="mt-2 text-center">
+                    <span className="text-sm text-gray-600">
+                      Tổng:{" "}
+                      <span className="font-semibold text-red-600">
+                        {(book.price * quantity).toLocaleString()}đ
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center"
+                >
+                  <i className="fas fa-shopping-cart mr-2"></i> Thêm {quantity}{" "}
+                  sản phẩm vào giỏ hàng
                 </button>
 
-                <button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
-                  <i className="fas fa-bolt mr-2"></i> Mua ngay
+                <button
+                  onClick={handleBuyNow}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center"
+                >
+                  <i className="fas fa-bolt mr-2"></i> Mua ngay ({quantity} sản
+                  phẩm)
                 </button>
               </div>
             </div>
