@@ -6,6 +6,7 @@ import { Dashboard } from "../components/admin/Dashboard";
 import { OrderManagement } from "../components/admin/OrderManagement";
 import { UserManagement } from "../components/admin/UserManagement";
 import { AuthorManagement } from "../components/admin/AuthorManagement";
+import { CategoryManagement } from "../components/admin/CategoryManagement";
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -17,6 +18,8 @@ const AdminPage = () => {
         return <Dashboard />;
       case "books":
         return <BookManagement />;
+      case "categories":
+        return <CategoryManagement />;
       case "authors":
         return <AuthorManagement />;
       case "orders":
