@@ -6,6 +6,7 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
     author: "",
     price: "",
     oldPrice: "",
+    quantity: "",
     image: "",
     publishDate: "",
     description: "",
@@ -15,8 +16,49 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
     pages: "",
     status: "Còn hàng",
     type: "Sách bìa mềm",
-    category: "bestseller",
+    category: "",
   });
+
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoadingCategories(true);
+
+        const mockCategories = [
+          { id: 1, name: "Văn học" },
+          { id: 2, name: "Khoa học" },
+          { id: 3, name: "Kinh tế" },
+          { id: 4, name: "Giáo dục" },
+          { id: 5, name: "Thiếu nhi" },
+          { id: 6, name: "Kỹ năng sống" },
+        ];
+
+        setCategories(mockCategories);
+
+        if (!book && mockCategories.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            category: mockCategories[0].id.toString(),
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+
+        setCategories([
+          { id: 1, name: "Văn học" },
+          { id: 2, name: "Khoa học" },
+          { id: 3, name: "Kinh tế" },
+        ]);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (book) {
@@ -35,18 +77,23 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (!formData.title || !formData.author || !formData.price) {
+    if (
+      !formData.title ||
+      !formData.author ||
+      !formData.price ||
+      !formData.quantity
+    ) {
       alert("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
-    // Convert price to number
     const bookData = {
       ...formData,
       price: parseInt(formData.price),
       oldPrice: formData.oldPrice ? parseInt(formData.oldPrice) : null,
+      quantity: parseInt(formData.quantity),
       pages: parseInt(formData.pages) || 0,
+      category: parseInt(formData.category),
     };
 
     onSubmit(bookData);
@@ -102,18 +149,28 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Danh mục
+              Danh mục *
             </label>
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              disabled={loadingCategories}
             >
-              <option value="bestseller">Best Seller</option>
-              <option value="trending">Trending</option>
-              <option value="new">Sách mới</option>
-              <option value="classic">Sách kinh điển</option>
+              {loadingCategories ? (
+                <option value="">Đang tải danh mục...</option>
+              ) : (
+                <>
+                  <option value="">Chọn danh mục</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
         </div>
@@ -133,6 +190,7 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
+              min="0"
             />
           </div>
 
@@ -146,6 +204,23 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
               value={formData.oldPrice}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              min="0"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Số lượng *
+            </label>
+            <input
+              type="number"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              min="0"
+              placeholder="Nhập số lượng sách"
             />
           </div>
 
