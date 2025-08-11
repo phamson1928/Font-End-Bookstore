@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 
 export const BookDetailModal = ({ isOpen, onClose, book }) => {
   const modalClass = isOpen ? "show" : "hide";
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   if (!book) return null;
 
@@ -134,8 +136,17 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 {book.title}
               </h2>
-              <p className="text-gray-600 mb-4">
-                Tác giả: <span className="font-medium">{book.author}</span>
+              <p className="text-blue-600 mb-4">
+                Tác giả:{" "}
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate(`/author/${encodeURIComponent(book.author)}`);
+                  }}
+                  className="font-medium hover:underline hover:text-blue-800 transition duration-200"
+                >
+                  {book.author}
+                </button>
               </p>
 
               <div className="flex items-center mb-4">
