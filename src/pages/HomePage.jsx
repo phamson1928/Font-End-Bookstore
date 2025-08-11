@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "../components/user/Header";
 import { HeroSection } from "../components/user/HeroSection";
 import { BookDetailModal } from "../components/user/BookDetailModal";
@@ -6,6 +6,7 @@ import { BookSection } from "../components/user/BookSection";
 import { Footer } from "../components/user/Footer";
 import { LoginModal } from "../components/user/LoginModal";
 import { RegisterModal } from "../components/user/RegisterModal";
+import axios from "axios";
 
 const HomePage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -187,6 +188,21 @@ const HomePage = () => {
   const sachtrinhtham = filteredBooks.filter(
     (book) => book.category === "trinhtham"
   );
+  useEffect(() => {
+    const pingInterval = setInterval(() => {
+      axios.post(
+        "/api/ping",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+    }, 2 * 60 * 1000); // 2 phút ping 1 lần
+
+    return () => clearInterval(pingInterval); // clear khi unmount
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
