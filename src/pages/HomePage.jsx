@@ -6,7 +6,7 @@ import { BookSection } from "../components/user/BookSection";
 import { Footer } from "../components/user/Footer";
 import { LoginModal } from "../components/user/LoginModal";
 import { RegisterModal } from "../components/user/RegisterModal";
-import axios from "axios";
+import { api } from "../api";
 
 const HomePage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -190,15 +190,7 @@ const HomePage = () => {
   );
   useEffect(() => {
     const pingInterval = setInterval(() => {
-      axios.post(
-        "/api/ping",
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      api.post("/ping", {});
     }, 2 * 60 * 1000); // 2 phút ping 1 lần
 
     return () => clearInterval(pingInterval); // clear khi unmount

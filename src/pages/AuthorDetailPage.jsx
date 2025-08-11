@@ -146,6 +146,7 @@ const AuthorDetailPage = () => {
     if (authorName) {
       fetchAuthorData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorName]);
 
   const handleBookClick = (book) => {
