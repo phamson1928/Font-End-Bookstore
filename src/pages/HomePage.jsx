@@ -6,7 +6,7 @@ import { BookSection } from "../components/user/BookSection";
 import { Footer } from "../components/user/Footer";
 import { LoginModal } from "../components/user/LoginModal";
 import { RegisterModal } from "../components/user/RegisterModal";
-import { api } from "../api";
+import { api, setToken, clearToken } from "../api";
 
 const HomePage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -16,6 +16,7 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [role, setRole] = useState("user");
 
   // Sample book data
   const books = [
@@ -146,25 +147,97 @@ const HomePage = () => {
     setShowBookDetail(true);
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login
-    setIsLoggedIn(true);
-    setUsername(e.target.username.value);
-    setShowLoginModal(false);
+    const emailInput = e.target.email?.value?.trim();
+    const passwordInput = e.target.password?.value;
+    if (!emailInput || !passwordInput) {
+      alert("Vui lòng nhập email và password");
+      return;
+    }
+    try {
+      const { data } = await api.post("/login", {
+        email: emailInput,
+        password: passwordInput,
+      });
+      if (data?.token) {
+        setToken(data.token);
+      }
+      setIsLoggedIn(true);
+      setUsername(data?.user?.name || data?.user?.email || emailInput);
+      setShowLoginModal(false);
+      setRole(data?.user?.role || "user");
+      localStorage.setItem("role", data?.user?.role || "user");
+    } catch (err) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      console.error("Login failed", { status, data, err });
+      const serverMsg =
+        typeof data === "string" ? data : data?.message || data?.error;
+      alert(serverMsg || "Đăng nhập thất bại. Vui lòng thử lại.");
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Simulate registration
-    setIsLoggedIn(true);
-    setUsername(e.target.username.value);
-    setShowRegisterModal(false);
+    const nameInput = e.target.name?.value?.trim();
+    const passwordInput = e.target.password?.value;
+    const confirmPasswordInput = e.target.confirmPassword?.value;
+    const fullNameInput = e.target.fullname?.value?.trim();
+    const emailInput = e.target.email?.value?.trim();
+
+    if (
+      !nameInput ||
+      !passwordInput ||
+      !confirmPasswordInput ||
+      !emailInput ||
+      !fullNameInput
+    ) {
+      alert(
+        "Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu"
+      );
+      return;
+    }
+
+    if (passwordInput !== confirmPasswordInput) {
+      alert("Mật khẩu và xác nhận mật khẩu không khớp");
+      return;
+    }
+
+    try {
+      const { data } = await api.post("/register", {
+        name: nameInput,
+        password: passwordInput,
+        email: emailInput,
+        fullName: fullNameInput,
+      });
+      if (data?.token) {
+        setToken(data.token);
+        setIsLoggedIn(true);
+        setUsername(data?.user?.name || nameInput);
+        setShowRegisterModal(false);
+        setRole(data?.user?.role || "user");
+        localStorage.setItem("role", data?.user?.role || "user");
+        return;
+      }
+      alert(data?.message || "Đăng ký thành công. Vui lòng đăng nhập.");
+      setShowRegisterModal(false);
+      setShowLoginModal(true);
+    } catch (err) {
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      console.error("Register failed", { status, data, err });
+      const serverMsg =
+        typeof data === "string" ? data : data?.message || data?.error;
+      alert(serverMsg || "Đăng ký thất bại. Vui lòng thử lại.");
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
+    setShowLoginModal(false);
+    clearToken();
   };
 
   const filteredBooks = books.filter(
@@ -188,12 +261,20 @@ const HomePage = () => {
   const sachtrinhtham = filteredBooks.filter(
     (book) => book.category === "trinhtham"
   );
-  useEffect(() => {
-    const pingInterval = setInterval(() => {
-      api.post("/ping", {});
-    }, 2 * 60 * 1000); // 2 phút ping 1 lần
 
-    return () => clearInterval(pingInterval); // clear khi unmount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    api
+      .get("/user")
+      .then(({ data }) => {
+        const nextRole = data?.user?.role || "user";
+        setRole(nextRole);
+        localStorage.setItem("role", nextRole);
+      })
+      .catch(() => {
+        // If failed, keep existing role or default to user
+      });
   }, []);
 
   return (
@@ -207,6 +288,7 @@ const HomePage = () => {
         isLoggedIn={isLoggedIn}
         username={username}
         handleLogout={handleLogout}
+        role={role}
       />
 
       {/* Main Content */}

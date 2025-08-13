@@ -1,65 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../api/client";
+import dayjs from "dayjs";
 
 export const UserManagement = () => {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      username: "nguyenvana",
-      email: "nguyenvana@email.com",
-      fullName: "Nguyễn Văn A",
-      phone: "0123456789",
-      role: "customer",
-      status: "active",
-      joinDate: "2024-01-01",
-      lastLogin: "2024-01-15",
-    },
-    {
-      id: 2,
-      username: "tranthib",
-      email: "tranthib@email.com",
-      fullName: "Trần Thị B",
-      phone: "0987654321",
-      role: "customer",
-      status: "active",
-      joinDate: "2024-01-05",
-      lastLogin: "2024-01-14",
-    },
-    {
-      id: 3,
-      username: "levanc",
-      email: "levanc@email.com",
-      fullName: "Lê Văn C",
-      phone: "0555666777",
-      role: "admin",
-      status: "active",
-      joinDate: "2023-12-01",
-      lastLogin: "2024-01-16",
-    },
-    {
-      id: 4,
-      username: "phamthid",
-      email: "phamthid@email.com",
-      fullName: "Phạm Thị D",
-      phone: "0333444555",
-      role: "customer",
-      status: "inactive",
-      joinDate: "2024-01-10",
-      lastLogin: "2024-01-12",
-    },
-  ]);
-
+  const [users, setUsers] = useState([]);
   const [userToDelete, setUserToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [stats, setStats] = useState({});
+
+  //Lấy thông tin thống kê users
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/user-stats");
+        setStats(response.data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  //Lấy thông tin users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/user-index");
+        setUsers(response.data);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // Xóa user
+  const handleConfirmDelete = async () => {
+    try {
+      const response = await api.delete(`/user-delete/${userToDelete.id}`);
+      console.log(response.data.message);
+      setUsers(users.filter((u) => u.id !== userToDelete.id));
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  };
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
     setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = () => {
-    setUsers(users.filter((u) => u.id !== userToDelete.id));
-    setShowDeleteModal(false);
-    setUserToDelete(null);
   };
 
   const handleCancelDelete = () => {
@@ -73,8 +63,8 @@ export const UserManagement = () => {
       : "bg-blue-100 text-blue-800";
   };
 
-  const getStatusColor = (status) => {
-    return status === "active"
+  const getStatusColor = (last_seen) => {
+    return last_seen
       ? "bg-green-100 text-green-800"
       : "bg-red-100 text-red-800";
   };
@@ -111,7 +101,9 @@ export const UserManagement = () => {
               <p className="text-sm font-medium text-gray-600">
                 Tổng người dùng
               </p>
-              <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.userUsers}
+              </p>
             </div>
           </div>
         </div>
@@ -138,7 +130,7 @@ export const UserManagement = () => {
                 Đang hoạt động
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {users.filter((user) => user.status === "active").length}
+                {stats.onlineUsers}
               </p>
             </div>
           </div>
@@ -164,7 +156,7 @@ export const UserManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Quản trị viên</p>
               <p className="text-2xl font-bold text-gray-900">
-                {users.filter((user) => user.role === "admin").length}
+                {stats.adminUsers}
               </p>
             </div>
           </div>
@@ -190,12 +182,7 @@ export const UserManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Mới hôm nay</p>
               <p className="text-2xl font-bold text-gray-900">
-                {
-                  users.filter((user) => {
-                    const today = new Date().toISOString().split("T")[0];
-                    return user.joinDate === today;
-                  }).length
-                }
+                {stats.newUsers}
               </p>
             </div>
           </div>
@@ -245,7 +232,7 @@ export const UserManagement = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-700">
-                          {user.fullName
+                          {user.name
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
@@ -253,10 +240,7 @@ export const UserManagement = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.fullName}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          @{user.username}
+                          {user.name}
                         </div>
                       </div>
                     </div>
@@ -264,7 +248,6 @@ export const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm text-gray-900">{user.email}</div>
-                      <div className="text-sm text-gray-500">{user.phone}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -276,22 +259,24 @@ export const UserManagement = () => {
                       {user.role === "admin" ? "Quản trị viên" : "Khách hàng"}
                     </span>
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        user.status
+                        user.last_seen
                       )}`}
                     >
-                      {user.status === "active"
-                        ? "Đang hoạt động"
-                        : "Không hoạt động"}
+                      {user.last_seen ? "Đang hoạt động" : "Không hoạt động"}
                     </span>
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.joinDate).toLocaleDateString("vi-VN")}
+                    {dayjs(user.created_at).format("DD/MM/YYYY")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.lastLogin).toLocaleDateString("vi-VN")}
+                    {user.last_login_at == null
+                      ? "Chưa đăng nhập lại"
+                      : dayjs(user.last_login_at).format("DD/MM/YYYY")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -316,8 +301,8 @@ export const UserManagement = () => {
               Xác nhận xóa người dùng
             </h3>
             <p className="mb-6 text-gray-700">
-              Bạn có chắc chắn muốn xóa người dùng{" "}
-              <b>{userToDelete?.fullName}</b> không?
+              Bạn có chắc chắn muốn xóa người dùng <b>{userToDelete?.name}</b>{" "}
+              không?
             </p>
             <div className="flex justify-end gap-3">
               <button

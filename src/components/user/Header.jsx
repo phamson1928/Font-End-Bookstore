@@ -10,6 +10,7 @@ export const Header = ({
   isLoggedIn,
   username,
   handleLogout,
+  role,
 }) => {
   const { getTotalItems } = useCart();
 
@@ -43,12 +44,14 @@ export const Header = ({
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700">Xin chào, {username}</span>
-                <Link
-                  to="/admin"
-                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md transition duration-300"
-                >
-                  Admin
-                </Link>
+                {String(role || "").toLowerCase() === "admin" && (
+                  <Link
+                    to="/admin"
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md transition duration-300"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-300"

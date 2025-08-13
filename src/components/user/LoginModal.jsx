@@ -26,14 +26,14 @@ export const LoginModal = ({
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="username"
+                htmlFor="email"
               >
-                Tên đăng nhập
+                Email
               </label>
               <input
                 type="text"
-                id="username"
-                name="username"
+                id="email"
+                name="email"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -47,7 +47,7 @@ export const LoginModal = ({
                 Mật khẩu
               </label>
               <input
-                type="text"
+                type="password"
                 id="password"
                 name="password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
