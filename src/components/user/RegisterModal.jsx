@@ -10,7 +10,7 @@ export const RegisterModal = ({
     <div
       className={`modal fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 ${modalClass}`}
     >
-      <div className="modal-content bg-white rounded-lg w-full max-w-md mx-4 transform -translate-y-10">
+      <div className="modal-content bg-white rounded-lg w-full max-w-md mx-4 transform translate-y-0">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-gray-800">
@@ -25,22 +25,6 @@ export const RegisterModal = ({
           </div>
 
           <form onSubmit={handleRegister}>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="fullname"
-              >
-                Họ và tên
-              </label>
-              <input
-                type="text"
-                id="fullname"
-                name="fullname"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-medium mb-2"
@@ -92,14 +76,14 @@ export const RegisterModal = ({
             <div className="mb-6">
               <label
                 className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="confirmPassword"
+                htmlFor="password_confirmation"
               >
                 Xác nhận mật khẩu
               </label>
               <input
                 type="password"
-                id="confirmPassword"
-                name="confirmPassword"
+                id="password_confirmation"
+                name="password_confirmation"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />

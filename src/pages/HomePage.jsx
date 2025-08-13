@@ -182,17 +182,10 @@ const HomePage = () => {
     e.preventDefault();
     const nameInput = e.target.name?.value?.trim();
     const passwordInput = e.target.password?.value;
-    const confirmPasswordInput = e.target.confirmPassword?.value;
-    const fullNameInput = e.target.fullname?.value?.trim();
+    const confirmPasswordInput = e.target.password_confirmation?.value;
     const emailInput = e.target.email?.value?.trim();
 
-    if (
-      !nameInput ||
-      !passwordInput ||
-      !confirmPasswordInput ||
-      !emailInput ||
-      !fullNameInput
-    ) {
+    if (!nameInput || !passwordInput || !confirmPasswordInput || !emailInput) {
       alert(
         "Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu"
       );
@@ -208,8 +201,8 @@ const HomePage = () => {
       const { data } = await api.post("/register", {
         name: nameInput,
         password: passwordInput,
+        password_confirmation: confirmPasswordInput,
         email: emailInput,
-        fullName: fullNameInput,
       });
       if (data?.token) {
         setToken(data.token);
