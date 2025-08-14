@@ -6,11 +6,16 @@ import { BookSection } from "../components/user/BookSection";
 import { Footer } from "../components/user/Footer";
 import { LoginModal } from "../components/user/LoginModal";
 import { RegisterModal } from "../components/user/RegisterModal";
+import { ForgotPasswordModal } from "../components/user/ForgotPasswordModal";
+import { ResetPasswordModal } from "../components/user/ResetPasswordModal";
 import { api, setToken, clearToken } from "../api";
 
 const HomePage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [showBookDetail, setShowBookDetail] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +35,7 @@ const HomePage = () => {
         "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300' viewBox='0 0 200 300'%3E%3Crect width='200' height='300' fill='%23f8d775'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3EĐắc Nhân Tâm%3C/text%3E%3C/svg%3E",
       publishDate: "01/01/2020",
       description:
-        "Đắc nhân tâm là quyển sách nổi tiếng nhất, bán chạy nhất và có tầm ảnh hưởng nhất của mọi thời đại. Tác phẩm đã được chuyển ngữ sang hầu hết các thứ tiếng trên thế giới và có mặt ở hàng trăm quốc gia.",
+        "Đắc nhân tâm là quyển sách nổi tiếng nhất, bán chạy nhất và có tầm ảnh hưởng nhất của mọi thởi đại. Tác phẩm đã được chuyển ngữ sang hầu hết các thứ tiếng trên thế giới và có mặt ở hàng trăm quốc gia.",
       language: "Tiếng Việt",
       discountPrice: 120000,
       weight: "350g",
@@ -226,6 +231,67 @@ const HomePage = () => {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    const email = e.target.email?.value?.trim();
+    if (!email) {
+      alert("Vui lòng nhập email");
+      return;
+    }
+    try {
+      const { data } = await api.post("/forgot-password", { email });
+      alert(
+        data?.message || "Đã gửi email đặt lại mật khẩu (nếu email tồn tại)"
+      );
+      setResetEmail(email);
+      setShowForgotPasswordModal(false);
+      setShowResetPasswordModal(true);
+    } catch (err) {
+      const status = err?.response?.status;
+      const resp = err?.response?.data;
+      console.error("Forgot password failed", { status, resp, err });
+      const serverMsg =
+        typeof resp === "string" ? resp : resp?.message || resp?.error;
+      alert(serverMsg || "Gửi yêu cầu thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    const email = e.target.email?.value?.trim();
+    const token = e.target.token?.value?.trim();
+    const password = e.target.password?.value;
+    const password_confirmation = e.target.password_confirmation?.value;
+    if (!email || !token || !password || !password_confirmation) {
+      alert("Vui lòng nhập đầy đủ email, token, mật khẩu và xác nhận mật khẩu");
+      return;
+    }
+    if (password !== password_confirmation) {
+      alert("Mật khẩu và xác nhận mật khẩu không khớp");
+      return;
+    }
+    try {
+      const { data } = await api.post("/reset-password", {
+        email,
+        token,
+        password,
+        password_confirmation,
+      });
+      alert(
+        data?.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập."
+      );
+      setShowResetPasswordModal(false);
+      setShowLoginModal(true);
+    } catch (err) {
+      const status = err?.response?.status;
+      const resp = err?.response?.data;
+      console.error("Reset password failed", { status, resp, err });
+      const serverMsg =
+        typeof resp === "string" ? resp : resp?.message || resp?.error;
+      alert(serverMsg || "Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
+    }
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername("");
@@ -345,6 +411,10 @@ const HomePage = () => {
           setShowLoginModal(false);
           setShowRegisterModal(true);
         }}
+        showForgotPasswordModal={() => {
+          setShowLoginModal(false);
+          setShowForgotPasswordModal(true);
+        }}
       />
 
       {/* Register Modal */}
@@ -356,6 +426,21 @@ const HomePage = () => {
           setShowRegisterModal(false);
           setShowLoginModal(true);
         }}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPasswordModal}
+        onClose={() => setShowForgotPasswordModal(false)}
+        handleForgotPassword={handleForgotPassword}
+      />
+
+      {/* Reset Password Modal */}
+      <ResetPasswordModal
+        isOpen={showResetPasswordModal}
+        onClose={() => setShowResetPasswordModal(false)}
+        handleResetPassword={handleResetPassword}
+        defaultEmail={resetEmail}
       />
 
       {/* Book Detail Modal */}

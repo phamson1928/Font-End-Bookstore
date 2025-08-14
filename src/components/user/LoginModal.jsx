@@ -3,6 +3,7 @@ export const LoginModal = ({
   onClose,
   handleLogin,
   showRegisterModal,
+  showForgotPasswordModal,
 }) => {
   const modalClass = isOpen ? "show" : "hide";
 
@@ -54,9 +55,13 @@ export const LoginModal = ({
                 required
               />
               <div className="flex justify-end mt-2">
-                <a href="#" className="text-sm text-blue-600 hover:underline">
+                <button
+                  type="button"
+                  onClick={showForgotPasswordModal}
+                  className="text-sm text-blue-600 hover:underline"
+                >
                   Quên mật khẩu?
-                </a>
+                </button>
               </div>
             </div>
 
