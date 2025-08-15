@@ -12,7 +12,7 @@ export const UserManagement = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await api.get("/user-stats");
+        const response = await api.get("/users-stats");
         setStats(response.data);
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -36,14 +36,21 @@ export const UserManagement = () => {
 
   // Xóa user
   const handleConfirmDelete = async () => {
+    if (!userToDelete?.id) {
+      console.warn("No user selected for deletion");
+      return;
+    }
     try {
       const response = await api.delete(`/user-delete/${userToDelete.id}`);
-      console.log(response.data.message);
-      setUsers(users.filter((u) => u.id !== userToDelete.id));
+      console.log(response?.data?.message || "User deleted");
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
       setShowDeleteModal(false);
       setUserToDelete(null);
     } catch (err) {
-      console.error("Error deleting user:", err);
+      console.error(
+        "Error deleting user:",
+        err?.response?.data || err?.message || err
+      );
     }
   };
 

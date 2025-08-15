@@ -1,48 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookForm } from "./BookForm";
+import { api } from "../../api";
 
 export const BookManagement = () => {
-  const [books, setBooks] = useState([
-    {
-      id: 1,
-      title: "Đắc Nhân Tâm",
-      author: "Dale Carnegie",
-      price: 120000,
-      oldPrice: 150000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300' viewBox='0 0 200 300'%3E%3Crect width='200' height='300' fill='%23f8d775'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3EĐắc Nhân Tâm%3C/text%3E%3C/svg%3E",
-      publishDate: "01/01/2020",
-      description:
-        "Đắc nhân tâm là quyển sách nổi tiếng nhất, bán chạy nhất và có tầm ảnh hưởng nhất của mọi thời đại.",
-      language: "Tiếng Việt",
-      weight: "350g",
-      packageSize: "20.5 x 14.5 x 1.5 cm",
-      pages: 320,
-      status: "Còn hàng",
-      type: "Sách bìa mềm",
-      category: "bestseller",
-    },
-    {
-      id: 2,
-      title: "Nhà Giả Kim",
-      author: "Paulo Coelho",
-      price: 79000,
-      oldPrice: 99000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='300' viewBox='0 0 200 300'%3E%3Crect width='200' height='300' fill='%23a2d2ff'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='18' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3ENhà Giả Kim%3C/text%3E%3C/svg%3E",
-      publishDate: "15/05/2019",
-      description:
-        "Tất cả những trải nghiệm trong chuyến phiêu du theo đuổi vận mệnh của mình đã giúp Santiago thấu hiểu được ý nghĩa sâu xa nhất của hạnh phúc.",
-      language: "Tiếng Việt",
-      weight: "280g",
-      packageSize: "20 x 14 x 1.2 cm",
-      pages: 228,
-      status: "Còn hàng",
-      type: "Sách bìa mềm",
-      category: "bestseller",
-    },
-  ]);
-
+  const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,6 +44,30 @@ export const BookManagement = () => {
       setEditingBook(null);
     }
   };
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const { data } = await api.get("/books");
+        setBooks(data);
+      } catch (err) {
+        console.error("Error fetching books:", err);
+      }
+    };
+    fetchBooks();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data } = await api.get("/categories");
+        setCategories(data);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -158,12 +144,12 @@ export const BookManagement = () => {
                         {book.title}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {book.category}
+                        {book.category?.name}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {book.author}
+                    {book.author?.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -180,12 +166,12 @@ export const BookManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        book.status === "Còn hàng"
+                        book.state === "Còn hàng"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {book.status}
+                      {book.state}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -250,6 +236,7 @@ export const BookManagement = () => {
 
             <BookForm
               book={editingBook}
+              categories={categories}
               onSubmit={editingBook ? handleEditBook : handleAddBook}
               onCancel={() => {
                 setShowAddForm(false);

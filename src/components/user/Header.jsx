@@ -11,6 +11,7 @@ export const Header = ({
   username,
   handleLogout,
   role,
+  categories,
 }) => {
   const { getTotalItems } = useCart();
 
@@ -91,62 +92,16 @@ export const Header = ({
 
         <nav className="py-3 border-t border-gray-200">
           <ul className="flex space-x-6 overflow-x-auto pb-2">
-            <li>
-              <a
-                href="#moi"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách mới
-              </a>
-            </li>
-            <li>
-              <a
-                href="#banchay"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách bán chạy
-              </a>
-            </li>
-            <li>
-              <a
-                href="#thieunhi"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách thiếu nhi
-              </a>
-            </li>
-            <li>
-              <a
-                href="#ngoaingu"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách ngoại ngữ
-              </a>
-            </li>
-            <li>
-              <a
-                href="#kinhte"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách kinh tế
-              </a>
-            </li>
-            <li>
-              <a
-                href="#vanhoc"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách văn học
-              </a>
-            </li>
-            <li>
-              <a
-                href="#trinhtham"
-                className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-              >
-                Sách trinh thám
-              </a>
-            </li>
+            {categories.map((category) => (
+              <li key={category.id}>
+                <a
+                  href={`#${category.slug}`}
+                  className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
+                >
+                  {category.name}
+                </a>
+              </li>
+            ))}
           </ul>
         </nav>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const BookForm = ({ book, onSubmit, onCancel }) => {
+export const BookForm = ({ book, onSubmit, onCancel, categories }) => {
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -10,55 +10,14 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
     image: "",
     publishDate: "",
     description: "",
-    language: "Tiếng Việt",
+    language: "",
     weight: "",
     packageSize: "",
     pages: "",
-    status: "Còn hàng",
-    type: "Sách bìa mềm",
+    status: "",
+    type: "",
     category: "",
   });
-
-  const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoadingCategories(true);
-
-        const mockCategories = [
-          { id: 1, name: "Văn học" },
-          { id: 2, name: "Khoa học" },
-          { id: 3, name: "Kinh tế" },
-          { id: 4, name: "Giáo dục" },
-          { id: 5, name: "Thiếu nhi" },
-          { id: 6, name: "Kỹ năng sống" },
-        ];
-
-        setCategories(mockCategories);
-
-        if (!book && mockCategories.length > 0) {
-          setFormData((prev) => ({
-            ...prev,
-            category: mockCategories[0].id.toString(),
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-
-        setCategories([
-          { id: 1, name: "Văn học" },
-          { id: 2, name: "Khoa học" },
-          { id: 3, name: "Kinh tế" },
-        ]);
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   useEffect(() => {
     if (book) {
@@ -157,20 +116,15 @@ export const BookForm = ({ book, onSubmit, onCancel }) => {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
-              disabled={loadingCategories}
             >
-              {loadingCategories ? (
-                <option value="">Đang tải danh mục...</option>
-              ) : (
-                <>
-                  <option value="">Chọn danh mục</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </>
-              )}
+              <>
+                <option value="">Chọn danh mục</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </>
             </select>
           </div>
         </div>

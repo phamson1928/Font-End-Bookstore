@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "../../api/client";
 
 export const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -9,33 +10,46 @@ export const CategoryManagement = () => {
     description: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [stats, setStats] = useState({});
 
-  // Mock data - replace with actual API calls
+  const fetchCategories = async () => {
+    try {
+      const { data } = await api.get("/categories");
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+        ? data.data
+        : [];
+      setCategories(list);
+    } catch (error) {
+      console.error("Failed to fetch categories:", {
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      });
+    }
+  };
+
   useEffect(() => {
-    const mockCategories = [
-      {
-        id: 1,
-        name: "Văn học",
-        description: "Sách văn học trong nước và nước ngoài",
-        bookCount: 45,
-        createdAt: "2024-01-15",
-      },
-      {
-        id: 2,
-        name: "Khoa học",
-        description: "Sách khoa học tự nhiên và công nghệ",
-        bookCount: 32,
-        createdAt: "2024-01-20",
-      },
-      {
-        id: 3,
-        name: "Kinh tế",
-        description: "Sách về kinh tế, tài chính và quản trị",
-        bookCount: 28,
-        createdAt: "2024-02-01",
-      },
-    ];
-    setCategories(mockCategories);
+    fetchCategories();
+  }, []);
+
+  //Lấy thông tin thống kê categories
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/categories-stats");
+        setStats(response.data);
+      } catch (err) {
+        console.error("Error fetching stats:", {
+          baseURL: api.defaults.baseURL,
+          url: "/categories/stats",
+          status: err?.response?.status,
+          data: err?.response?.data,
+        });
+      }
+    };
+    fetchStats();
   }, []);
 
   const handleInputChange = (e) => {
@@ -46,28 +60,23 @@ export const CategoryManagement = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingCategory) {
-      // Update existing category
-      setCategories((prev) =>
-        prev.map((category) =>
-          category.id === editingCategory.id
-            ? { ...category, ...formData }
-            : category
-        )
+    try {
+      if (editingCategory) {
+        await api.put(`/categories/${editingCategory.id}`, formData);
+        await fetchCategories();
+      } else {
+        await api.post("/categories", formData);
+        await fetchCategories();
+      }
+      resetForm();
+    } catch (err) {
+      console.error(
+        "Failed to save category:",
+        err?.response?.data || err?.message || err
       );
-    } else {
-      // Add new category
-      const newCategory = {
-        id: Date.now(),
-        ...formData,
-        bookCount: 0,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setCategories((prev) => [...prev, newCategory]);
     }
-    resetForm();
   };
 
   const resetForm = () => {
@@ -85,19 +94,25 @@ export const CategoryManagement = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (categoryId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-      setCategories((prev) =>
-        prev.filter((category) => category.id !== categoryId)
+  const handleDelete = async (categoryId) => {
+    try {
+      await api.delete(`/categories/${categoryId}`);
+      alert("Xóa danh mục thành công");
+      await fetchCategories();
+    } catch (err) {
+      console.error(
+        "Failed to delete category:",
+        err?.response?.data || err?.message || err
       );
     }
   };
 
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCategories = (categories || []).filter((category) => {
+    const name = (category?.name || "").toLowerCase();
+    const desc = (category?.description || "").toLowerCase();
+    const term = (searchTerm || "").toLowerCase();
+    return name.includes(term) || desc.includes(term);
+  });
 
   return (
     <div className="space-y-6">
@@ -111,7 +126,7 @@ export const CategoryManagement = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors cursor-pointer"
         >
           <svg
             className="w-5 h-5"
@@ -152,7 +167,7 @@ export const CategoryManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng danh mục</p>
               <p className="text-2xl font-bold text-gray-900">
-                {categories.length}
+                {stats.categoriesTotal || 0}
               </p>
             </div>
           </div>
@@ -178,7 +193,7 @@ export const CategoryManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng sách</p>
               <p className="text-2xl font-bold text-gray-900">
-                {categories.reduce((sum, cat) => sum + cat.bookCount, 0)}
+                {stats.booksTotal || 0}
               </p>
             </div>
           </div>
@@ -206,12 +221,7 @@ export const CategoryManagement = () => {
                 Trung bình sách/danh mục
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {categories.length > 0
-                  ? Math.round(
-                      categories.reduce((sum, cat) => sum + cat.bookCount, 0) /
-                        categories.length
-                    )
-                  : 0}
+                {stats.average || 0}
               </p>
             </div>
           </div>
@@ -268,8 +278,15 @@ export const CategoryManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredCategories.map((category) => (
-                <tr key={category.id} className="hover:bg-gray-50">
+              {filteredCategories.map((category, index) => (
+                <tr
+                  key={
+                    category?.id ??
+                    category?._id ??
+                    `cat-${category?.name ?? "unknown"}-${index}`
+                  }
+                  className="hover:bg-gray-50"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -301,11 +318,11 @@ export const CategoryManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {category.bookCount} sách
+                      {category.books_count || 0} sách
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(category.createdAt).toLocaleDateString("vi-VN")}
+                    {new Date(category.created_at).toLocaleDateString("vi-VN")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
