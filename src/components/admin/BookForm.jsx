@@ -6,7 +6,7 @@ export const BookForm = ({
   handleEditBook,
   onCancel,
   categories,
-  loading = false,
+  loading = true,
 }) => {
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -51,7 +51,6 @@ export const BookForm = ({
     if (book) {
       setFormData(book);
     } else {
-      // Reset form khi không có book (thêm mới)
       resetForm();
     }
   }, [book]);

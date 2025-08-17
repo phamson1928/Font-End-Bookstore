@@ -1,65 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "../../api";
+import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
+import dayjs from "dayjs";
 
 export const AuthorManagement = () => {
-  const [authors, setAuthors] = useState([
-    {
-      id: 1,
-      name: "Nguyễn Nhật Ánh",
-      age: 65,
-      gender: "Nam",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e0e7ff'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3ENNÁ%3C/text%3E%3C/svg%3E",
-      description:
-        "Nhà văn nổi tiếng với nhiều tác phẩm dành cho thiếu nhi và thanh thiếu niên.",
-      booksCount: 25,
-      joinDate: "2020-01-15",
-    },
-    {
-      id: 2,
-      name: "Dale Carnegie",
-      age: 77,
-      gender: "Nam",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23fef3c7'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3EDC%3C/text%3E%3C/svg%3E",
-      description:
-        "Tác giả của cuốn sách nổi tiếng 'Đắc Nhân Tâm' và nhiều tác phẩm về phát triển bản thân.",
-      booksCount: 12,
-      joinDate: "2019-03-20",
-    },
-    {
-      id: 3,
-      name: "Paulo Coelho",
-      age: 76,
-      gender: "Nam",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23dcfce7'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3EPC%3C/text%3E%3C/svg%3E",
-      description:
-        "Nhà văn Brazil nổi tiếng với tác phẩm 'Nhà Giả Kim' và nhiều tiểu thuyết triết lý.",
-      booksCount: 18,
-      joinDate: "2019-07-10",
-    },
-    {
-      id: 4,
-      name: "Rosie Nguyễn",
-      age: 32,
-      gender: "Nữ",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23fce7f3'/%3E%3Ctext x='50%' y='50%' font-family='Arial' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23333'%3ERN%3C/text%3E%3C/svg%3E",
-      description:
-        "Tác giả trẻ với những cuốn sách về phát triển cá nhân và lối sống tích cực.",
-      booksCount: 8,
-      joinDate: "2021-05-12",
-    },
-  ]);
-
+  const [loading, setLoading] = useState(true);
+  const [authors, setAuthors] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState(null);
+  const [stats, setStats] = useState({});
   const [formData, setFormData] = useState({
     name: "",
     age: "",
     gender: "Nam",
     image: "",
     description: "",
+    nationality: "",
+    total_work: "",
   });
 
   const handleInputChange = (e) => {
@@ -71,48 +28,70 @@ export const AuthorManagement = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormData((prev) => ({
-          ...prev,
-          image: e.target.result,
-        }));
-      };
-      reader.readAsDataURL(file);
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Vui lòng chọn file hình ảnh hợp lệ");
+        e.target.value = "";
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File hình ảnh không được lớn hơn 5MB");
+        e.target.value = "";
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        image: file,
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editingAuthor) {
-      // Sửa tác giả
-      setAuthors((prev) =>
-        prev.map((author) =>
-          author.id === editingAuthor.id
-            ? {
-                ...author,
-                ...formData,
-                age: parseInt(formData.age),
-              }
-            : author
-        )
-      );
-    } else {
-      // Thêm tác giả mới
-      const newAuthor = {
-        id: Date.now(),
-        ...formData,
-        age: parseInt(formData.age),
-        booksCount: 0,
-        joinDate: new Date().toISOString().split("T")[0],
-      };
-      setAuthors((prev) => [...prev, newAuthor]);
-    }
+    try {
+      const submitData = new FormData();
+      submitData.append("name", formData.name);
+      submitData.append("age", Number(formData.age));
+      submitData.append("gender", formData.gender);
+      submitData.append("description", formData.description);
+      if (formData.nationality)
+        submitData.append("nationality", formData.nationality);
+      if (formData.total_work !== "")
+        submitData.append("total_work", Number(formData.total_work));
+      if (formData.image instanceof File) {
+        submitData.append("image", formData.image);
+      }
 
-    resetForm();
+      if (editingAuthor) {
+        await api.put(`/authors/${editingAuthor.id}`, submitData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        await api.post("/authors", submitData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      const { data } = await api.get("/authors");
+      setAuthors(data);
+      resetForm();
+    } catch (error) {
+      console.error("Error submitting author:", error);
+      if (error.response?.data?.errors) {
+        const errorMessages = Object.values(error.response.data.errors).flat();
+        alert(`Lỗi xác thực: ${errorMessages.join(", ")}`);
+      } else if (error.response?.data?.message) {
+        alert(`Lỗi: ${error.response.data.message}`);
+      } else {
+        alert("Có lỗi xảy ra khi gửi form. Vui lòng thử lại.");
+      }
+    }
   };
 
   const handleEdit = (author) => {
@@ -123,6 +102,11 @@ export const AuthorManagement = () => {
       gender: author.gender,
       image: author.image,
       description: author.description,
+      nationality: author.nationality || "",
+      total_work:
+        typeof author.total_work === "number"
+          ? author.total_work.toString()
+          : "",
     });
     setShowModal(true);
   };
@@ -140,6 +124,8 @@ export const AuthorManagement = () => {
       gender: "Nam",
       image: "",
       description: "",
+      nationality: "",
+      total_work: "",
     });
     setEditingAuthor(null);
     setShowModal(false);
@@ -157,6 +143,35 @@ export const AuthorManagement = () => {
       setEditingAuthor(null);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [authorsRes, statsRes] = await Promise.all([
+          api.get("/authors"),
+          api.get("/authors-stats"),
+        ]);
+        setAuthors(authorsRes.data);
+        setStats(statsRes.data);
+      } catch (error) {
+        console.error("Lỗi khi fetch dữ liệu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -208,7 +223,7 @@ export const AuthorManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng tác giả</p>
               <p className="text-2xl font-bold text-gray-900">
-                {authors.length}
+                {stats.authorsTotal || 0}
               </p>
             </div>
           </div>
@@ -232,9 +247,9 @@ export const AuthorManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Tổng sách</p>
+              <p className="text-sm font-medium text-gray-600">Sách hiện có</p>
               <p className="text-2xl font-bold text-gray-900">
-                {authors.reduce((sum, author) => sum + author.booksCount, 0)}
+                {stats.booksTotal || 0}
               </p>
             </div>
           </div>
@@ -260,7 +275,7 @@ export const AuthorManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tác giả nam</p>
               <p className="text-2xl font-bold text-gray-900">
-                {authors.filter((author) => author.gender === "Nam").length}
+                {stats.maleAuthors || 0}
               </p>
             </div>
           </div>
@@ -286,7 +301,7 @@ export const AuthorManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tác giả nữ</p>
               <p className="text-2xl font-bold text-gray-900">
-                {authors.filter((author) => author.gender === "Nữ").length}
+                {stats.femaleAuthors || 0}
               </p>
             </div>
           </div>
@@ -314,7 +329,10 @@ export const AuthorManagement = () => {
                   Giới tính
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Số sách
+                  Quốc tịch
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Tổng tác phẩm
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ngày tham gia
@@ -331,7 +349,10 @@ export const AuthorManagement = () => {
                     <div className="flex items-center">
                       <img
                         className="h-12 w-12 rounded-full object-cover"
-                        src={author.image}
+                        src={
+                          getImageUrl(author.image) ||
+                          getBookPlaceholder(48, 64)
+                        }
                         alt={author.name}
                       />
                       <div className="ml-4">
@@ -357,10 +378,13 @@ export const AuthorManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {author.booksCount}
+                    {author.nationality || "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(author.joinDate).toLocaleDateString("vi-VN")}
+                    {author.total_work}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {dayjs(author.created_at).format("DD/MM/YYYY")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button
@@ -452,6 +476,21 @@ export const AuthorManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tổng tác phẩm
+                </label>
+                <input
+                  type="number"
+                  name="total_work"
+                  value={formData.total_work}
+                  onChange={handleInputChange}
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nhập tổng số tác phẩm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Giới tính
                 </label>
                 <select
@@ -467,10 +506,25 @@ export const AuthorManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quốc tịch
+                </label>
+                <input
+                  type="text"
+                  name="nationality"
+                  value={formData.nationality}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nhập quốc tịch (VD: Việt Nam)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Hình ảnh
                 </label>
                 <input
                   type="file"
+                  name="image"
                   accept="image/*"
                   onChange={handleImageChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -478,7 +532,11 @@ export const AuthorManagement = () => {
                 {formData.image && (
                   <div className="mt-2">
                     <img
-                      src={formData.image}
+                      src={
+                        formData.image instanceof File
+                          ? URL.createObjectURL(formData.image)
+                          : formData.image
+                      }
                       alt="Preview"
                       className="h-20 w-20 rounded-full object-cover"
                     />

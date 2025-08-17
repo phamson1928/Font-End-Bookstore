@@ -11,6 +11,7 @@ export const CategoryManagement = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
 
   const fetchCategories = async () => {
     try {
@@ -40,6 +41,7 @@ export const CategoryManagement = () => {
       try {
         const response = await api.get("/categories-stats");
         setStats(response.data);
+        setLoading(false);
       } catch (err) {
         console.error("Error fetching stats:", {
           baseURL: api.defaults.baseURL,
@@ -113,6 +115,15 @@ export const CategoryManagement = () => {
     const term = (searchTerm || "").toLowerCase();
     return name.includes(term) || desc.includes(term);
   });
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

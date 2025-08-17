@@ -9,13 +9,12 @@ export const BookManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchBooks = async () => {
     try {
       const { data } = await api.get("/books");
       console.log("Books data from API:", data);
-      // Log first book to see image field structure
       if (data.length > 0) {
         console.log("First book image field:", data[0].image);
         console.log("First book full data:", data[0]);
@@ -24,6 +23,7 @@ export const BookManagement = () => {
     } catch (err) {
       console.error("Error fetching books:", err);
     }
+    setLoading(false);
   };
 
   const handleAddBook = async (formData, e) => {
@@ -36,66 +36,19 @@ export const BookManagement = () => {
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
       }
-
-      // Kiểm tra xem có dữ liệu cần thiết không
-      if (
-        !formData.has("title") ||
-        !formData.has("author") ||
-        !formData.has("price") ||
-        !formData.has("category_id") ||
-        !formData.has("language")
-      ) {
-        alert("Thiếu dữ liệu bắt buộc. Vui lòng kiểm tra lại form.");
-        return;
-      }
-
       // Sử dụng FormData với multipart/form-data
       const response = await api.post("/books", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-
       console.log("Book added successfully:", response.data);
-
       // Fetch lại danh sách sách từ server
       await fetchBooks();
-
       // Đóng form
       setShowAddForm(false);
     } catch (error) {
       console.error("Error adding book:", error);
-
-      // Log chi tiết lỗi từ server
-      if (error.response) {
-        console.error("Server error details:", error.response.data);
-        console.error("Status:", error.response.status);
-
-        // Hiển thị thông báo lỗi chi tiết từ server
-        if (error.response.data && error.response.data.errors) {
-          const errorMessages = Object.values(
-            error.response.data.errors
-          ).flat();
-          alert(`Lỗi validation: ${errorMessages.join(", ")}`);
-        } else if (error.response.data && error.response.data.message) {
-          alert(`Lỗi: ${error.response.data.message}`);
-        } else if (
-          error.response.data &&
-          typeof error.response.data === "object"
-        ) {
-          // Log toàn bộ response data để debug
-          console.log("Full error response:", error.response.data);
-          alert(
-            "Có lỗi xảy ra khi thêm sách. Vui lòng kiểm tra console để biết chi tiết."
-          );
-        } else {
-          alert(
-            "Có lỗi xảy ra khi thêm sách. Vui lòng kiểm tra lại thông tin."
-          );
-        }
-      } else {
-        alert("Có lỗi xảy ra khi thêm sách. Vui lòng thử lại.");
-      }
     } finally {
       setLoading(false);
     }
@@ -159,10 +112,6 @@ export const BookManagement = () => {
   };
 
   useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const { data } = await api.get("/categories");
@@ -172,7 +121,17 @@ export const BookManagement = () => {
       }
     };
     fetchCategories();
+    fetchBooks();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

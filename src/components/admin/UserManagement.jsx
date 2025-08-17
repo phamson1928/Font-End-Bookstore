@@ -7,31 +7,29 @@ export const UserManagement = () => {
   const [userToDelete, setUserToDelete] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
 
   //Lấy thông tin thống kê users
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get("/users-stats");
-        setStats(response.data);
-      } catch (err) {
-        console.error("Error fetching stats:", err);
-      }
-    };
-    fetchStats();
-  }, []);
+        setLoading(true);
 
-  //Lấy thông tin users
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await api.get("/user-index");
-        setUsers(response.data);
+        const [statsRes, usersRes] = await Promise.all([
+          api.get("/users-stats"),
+          api.get("/user-index"),
+        ]);
+
+        setStats(statsRes.data);
+        setUsers(usersRes.data);
       } catch (err) {
-        console.error("Error fetching users:", err);
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchUsers();
+
+    fetchData();
   }, []);
 
   // Xóa user
@@ -75,6 +73,15 @@ export const UserManagement = () => {
       ? "bg-green-100 text-green-800"
       : "bg-red-100 text-red-800";
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
