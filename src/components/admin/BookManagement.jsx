@@ -8,26 +8,133 @@ export const BookManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleAddBook = (newBook) => {
-    const bookWithId = {
-      ...newBook,
-      id: Math.max(...books.map((b) => b.id)) + 1,
-    };
-    setBooks([...books, bookWithId]);
-    setShowAddForm(false);
+  const fetchBooks = async () => {
+    try {
+      const { data } = await api.get("/books");
+      setBooks(data);
+    } catch (err) {
+      console.error("Error fetching books:", err);
+    }
   };
 
-  const handleEditBook = (updatedBook) => {
-    setBooks(
-      books.map((book) => (book.id === updatedBook.id ? updatedBook : book))
-    );
-    setEditingBook(null);
+  const handleAddBook = async (formData, e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Log FormData để debug
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      // Kiểm tra xem có dữ liệu cần thiết không
+      if (
+        !formData.has("title") ||
+        !formData.has("author") ||
+        !formData.has("price") ||
+        !formData.has("category_id") ||
+        !formData.has("language")
+      ) {
+        alert("Thiếu dữ liệu bắt buộc. Vui lòng kiểm tra lại form.");
+        return;
+      }
+
+      // Sử dụng FormData với multipart/form-data
+      const response = await api.post("/books", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Book added successfully:", response.data);
+
+      // Fetch lại danh sách sách từ server
+      await fetchBooks();
+
+      // Đóng form
+      setShowAddForm(false);
+    } catch (error) {
+      console.error("Error adding book:", error);
+
+      // Log chi tiết lỗi từ server
+      if (error.response) {
+        console.error("Server error details:", error.response.data);
+        console.error("Status:", error.response.status);
+
+        // Hiển thị thông báo lỗi chi tiết từ server
+        if (error.response.data && error.response.data.errors) {
+          const errorMessages = Object.values(
+            error.response.data.errors
+          ).flat();
+          alert(`Lỗi validation: ${errorMessages.join(", ")}`);
+        } else if (error.response.data && error.response.data.message) {
+          alert(`Lỗi: ${error.response.data.message}`);
+        } else if (
+          error.response.data &&
+          typeof error.response.data === "object"
+        ) {
+          // Log toàn bộ response data để debug
+          console.log("Full error response:", error.response.data);
+          alert(
+            "Có lỗi xảy ra khi thêm sách. Vui lòng kiểm tra console để biết chi tiết."
+          );
+        } else {
+          alert(
+            "Có lỗi xảy ra khi thêm sách. Vui lòng kiểm tra lại thông tin."
+          );
+        }
+      } else {
+        alert("Có lỗi xảy ra khi thêm sách. Vui lòng thử lại.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteBook = (bookId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa sách này?")) {
-      setBooks(books.filter((book) => book.id !== bookId));
+  const handleEditBook = async (formData, e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Sử dụng FormData với multipart/form-data
+      const response = await api.put(`/books/${editingBook.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Book updated successfully:", response.data);
+
+      // Fetch lại danh sách sách từ server
+      await fetchBooks();
+
+      // Đóng form
+      setEditingBook(null);
+    } catch (error) {
+      console.error("Error updating book:", error);
+      alert("Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteBook = async (bookId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sách này?")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/books/${bookId}`);
+      console.log("Book deleted successfully");
+
+      // Fetch lại danh sách sách từ server
+      await fetchBooks();
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      alert("Có lỗi xảy ra khi xóa sách. Vui lòng thử lại.");
     }
   };
 
@@ -37,7 +144,6 @@ export const BookManagement = () => {
       book.author.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle click outside modal to close
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       setShowAddForm(false);
@@ -46,14 +152,6 @@ export const BookManagement = () => {
   };
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const { data } = await api.get("/books");
-        setBooks(data);
-      } catch (err) {
-        console.error("Error fetching books:", err);
-      }
-    };
     fetchBooks();
   }, []);
 
@@ -78,9 +176,10 @@ export const BookManagement = () => {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Thêm sách mới
+          {loading ? "Đang xử lý..." : "Thêm sách mới"}
         </button>
       </div>
 
@@ -149,7 +248,7 @@ export const BookManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {book.author?.name}
+                    {book.author}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
@@ -237,7 +336,9 @@ export const BookManagement = () => {
             <BookForm
               book={editingBook}
               categories={categories}
-              onSubmit={editingBook ? handleEditBook : handleAddBook}
+              handleAddBook={handleAddBook}
+              handleEditBook={handleEditBook}
+              loading={loading}
               onCancel={() => {
                 setShowAddForm(false);
                 setEditingBook(null);
