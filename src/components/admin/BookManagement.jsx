@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { BookForm } from "./BookForm";
 import { api } from "../../api";
+import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 
 export const BookManagement = () => {
   const [books, setBooks] = useState([]);
@@ -13,6 +14,12 @@ export const BookManagement = () => {
   const fetchBooks = async () => {
     try {
       const { data } = await api.get("/books");
+      console.log("Books data from API:", data);
+      // Log first book to see image field structure
+      if (data.length > 0) {
+        console.log("First book image field:", data[0].image);
+        console.log("First book full data:", data[0]);
+      }
       setBooks(data);
     } catch (err) {
       console.error("Error fetching books:", err);
@@ -232,9 +239,20 @@ export const BookManagement = () => {
                 <tr key={book.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <img
-                      src={book.image}
+                      src={
+                        getImageUrl(book.image) || getBookPlaceholder(48, 64)
+                      }
                       alt={book.title}
                       className="w-12 h-16 object-cover rounded"
+                      onError={(e) => {
+                        console.log(
+                          "Image failed to load for book:",
+                          book.title,
+                          "Image path:",
+                          book.image
+                        );
+                        e.target.src = getBookPlaceholder(48, 64);
+                      }}
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

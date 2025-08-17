@@ -36,7 +36,6 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/author/:authorName" element={<AuthorDetailPage />} />
         </Routes>
       </Router>
     </CartProvider>

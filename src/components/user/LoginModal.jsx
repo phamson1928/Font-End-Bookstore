@@ -27,13 +27,13 @@ export const LoginModal = ({
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="email"
+                htmlFor="email_login"
               >
                 Email
               </label>
               <input
                 type="text"
-                id="email"
+                id="email_login"
                 name="email"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -43,13 +43,13 @@ export const LoginModal = ({
             <div className="mb-6">
               <label
                 className="block text-gray-700 text-sm font-medium mb-2"
-                htmlFor="password"
+                htmlFor="password_login"
               >
                 Mật khẩu
               </label>
               <input
                 type="password"
-                id="password"
+                id="password_login"
                 name="password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required

@@ -1,3 +1,5 @@
+import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
+
 export const BookCard = ({ book, onClick }) => {
   const discountPercent = Math.round(
     ((book.oldPrice - book.price) / book.oldPrice) * 100
@@ -10,9 +12,12 @@ export const BookCard = ({ book, onClick }) => {
     >
       <div className="relative">
         <img
-          src={book.image}
+          src={getImageUrl(book.image) || getBookPlaceholder(200, 300)}
           alt={book.title}
           className="w-full h-48 object-cover"
+          onError={(e) => {
+            e.target.src = getBookPlaceholder(200, 300);
+          }}
         />
         {discountPercent > 0 && (
           <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">

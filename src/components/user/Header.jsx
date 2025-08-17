@@ -26,7 +26,7 @@ export const Header = ({
             </Link>
           </div>
 
-          <div className="w-full md:w-1/2 mb-4 md:mb-0">
+          <div className="w-full md:w-1/2 mb-4 md:mb-0 mr-4">
             <div className="relative">
               <input
                 type="text"
@@ -42,9 +42,20 @@ export const Header = ({
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Authors Button */}
+            <Link
+              to="/authors"
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <i className="fas fa-users mr-2"></i>
+              <span className="font-small">Tác giả</span>
+            </Link>
+
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-700">Xin chào, {username}</span>
+                <span className="text-gray-700">
+                  Xin chào, <div className="text-blue-600">{username}</div>
+                </span>
                 {String(role || "").toLowerCase() === "admin" && (
                   <Link
                     to="/admin"

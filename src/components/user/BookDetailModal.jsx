@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
+import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 
 export const BookDetailModal = ({ isOpen, onClose, book }) => {
   const modalClass = isOpen ? "show" : "hide";
@@ -66,9 +67,12 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
           <div className="flex flex-col md:flex-row">
             <div className="md:w-1/3 mb-6 md:mb-0">
               <img
-                src={book.image}
+                src={getImageUrl(book.image) || getBookPlaceholder(400, 600)}
                 alt={book.title}
                 className="w-full rounded-lg shadow-md"
+                onError={(e) => {
+                  e.target.src = getBookPlaceholder(400, 600);
+                }}
               />
 
               <div className="mt-6 space-y-4">
