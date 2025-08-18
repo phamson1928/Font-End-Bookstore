@@ -2,7 +2,7 @@ import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 
 export const BookCard = ({ book, onClick }) => {
   const discountPercent = Math.round(
-    ((book.oldPrice - book.price) / book.oldPrice) * 100
+    ((book.discount_price - book.price) / book.discount_price) * 100
   );
 
   return (
@@ -34,9 +34,9 @@ export const BookCard = ({ book, onClick }) => {
           <span className="text-red-600 font-bold">
             {book.price.toLocaleString()}đ
           </span>
-          {book.oldPrice > book.price && (
+          {book.discount_price > book.price && (
             <span className="text-gray-500 text-sm line-through ml-2">
-              {book.oldPrice.toLocaleString()}đ
+              {book.discount_price.toLocaleString()}đ
             </span>
           )}
         </div>

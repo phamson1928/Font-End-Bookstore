@@ -22,11 +22,8 @@ const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("user");
+  const [books, setBooks] = useState([]);
 
-  // Sample book data
-  const books = [];
-
-  // Filter by search query (title or author)
   const filteredBooks = books.filter(
     (book) =>
       book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -188,27 +185,36 @@ const HomePage = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get("/categories");
-        setCategories(response.data);
+        const token = localStorage.getItem("token");
+
+        const requests = [
+          api.get("/books"),
+          api.get("/categories"),
+          token ? api.get("/user") : Promise.resolve(null),
+        ];
+
+        const [booksRes, categoriesRes, userRes] = await Promise.all(requests);
+
+        // set books
+        if (booksRes) setBooks(booksRes.data);
+
+        // set categories
+        if (categoriesRes) setCategories(categoriesRes.data);
+
+        // set user role nếu có token
+        if (userRes) {
+          const nextRole = userRes.data?.user?.role || "user";
+          setRole(nextRole);
+          localStorage.setItem("role", nextRole);
+        }
       } catch (err) {
-        console.error("Error fetching categories:", err);
+        console.error("Error fetching data:", err);
       }
     };
-    fetchCategories();
-  }, []);
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    api
-      .get("/user")
-      .then(({ data }) => {
-        const nextRole = data?.user?.role || "user";
-        setRole(nextRole);
-        localStorage.setItem("role", nextRole);
-      })
-      .catch(() => {});
+
+    fetchData();
   }, []);
 
   return (
@@ -237,7 +243,9 @@ const HomePage = () => {
             title={category.name}
             books={filteredBooks.filter(
               (book) =>
-                book.category === (category.slug ?? category.id ?? category._id)
+                book.category_id === category.id ||
+                book.category === category.slug ||
+                book.category === category._id
             )}
             handleBookClick={handleBookClick}
           />
