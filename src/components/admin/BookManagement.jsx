@@ -26,22 +26,17 @@ export const BookManagement = () => {
     setLoading(false);
   };
 
-  const handleAddBook = async (formData, e) => {
-    e.preventDefault();
+  const handleAddBook = async (formData) => {
     setLoading(true);
 
     try {
       // Log FormData để debug
-      console.log("FormData contents:");
+      console.log("[ADD] FormData contents:");
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
       }
-      // Sử dụng FormData với multipart/form-data
-      const response = await api.post("/books", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // Để axios tự set Content-Type với boundary
+      const response = await api.post("/books", formData);
       console.log("Book added successfully:", response.data);
       // Fetch lại danh sách sách từ server
       await fetchBooks();
@@ -49,22 +44,32 @@ export const BookManagement = () => {
       setShowAddForm(false);
     } catch (error) {
       console.error("Error adding book:", error);
+      if (error?.response) {
+        console.error("[ADD] Response status:", error.response.status);
+        console.error("[ADD] Response data:", error.response.data);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditBook = async (formData, e) => {
-    e.preventDefault();
+  const handleEditBook = async (formData) => {
     setLoading(true);
 
     try {
-      // Sử dụng FormData với multipart/form-data
-      const response = await api.put(`/books/${editingBook.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // Một số backend không parse multipart cho PUT
+      // -> Dùng method override: POST với _method=PUT
+      if (formData instanceof FormData) {
+        formData.append("_method", "PUT");
+      }
+
+      console.log("[EDIT] Updating book id:", editingBook?.id);
+      console.log("[EDIT] FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await api.post(`/books/${editingBook.id}`, formData);
 
       console.log("Book updated successfully:", response.data);
 
@@ -75,6 +80,10 @@ export const BookManagement = () => {
       setEditingBook(null);
     } catch (error) {
       console.error("Error updating book:", error);
+      if (error?.response) {
+        console.error("[EDIT] Response status:", error.response.status);
+        console.error("[EDIT] Response data:", error.response.data);
+      }
       alert("Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.");
     } finally {
       setLoading(false);

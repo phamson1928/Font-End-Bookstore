@@ -7,9 +7,7 @@ const BASE_URL =
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  // Do not set a global Content-Type; let interceptors decide per request
 });
 
 // Attach Authorization header if token exists
@@ -19,6 +17,27 @@ api.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Ensure correct Content-Type handling
+    config.headers = config.headers || {};
+    if (config.data instanceof FormData) {
+      // Let the browser set multipart boundaries
+      delete config.headers["Content-Type"];
+      delete config.headers["content-type"];
+    } else {
+      // Default to JSON only for methods with body
+      const method = (config.method || "get").toLowerCase();
+      const methodHasBody = ["post", "put", "patch"].includes(method);
+      const hasData = config.data !== undefined && config.data !== null;
+      if (
+        methodHasBody &&
+        hasData &&
+        !config.headers["Content-Type"] &&
+        !config.headers["content-type"]
+      ) {
+        config.headers["Content-Type"] = "application/json";
+      }
     }
     return config;
   },

@@ -49,7 +49,23 @@ export const BookForm = ({
 
   useEffect(() => {
     if (book) {
-      setFormData(book);
+      // Map to flat form shape; avoid nested objects and keep image empty unless a new file is chosen
+      setFormData({
+        title: book.title || "",
+        author: book.author || "",
+        price: book.price ?? "",
+        discount_price: book.discount_price ?? "",
+        image: "",
+        publication_date: book.publication_date || "",
+        description: book.description || "",
+        language: book.language || "Tiếng Việt",
+        weight_in_grams: book.weight_in_grams || "",
+        packaging_size_cm: book.packaging_size_cm || "",
+        number_of_pages: book.number_of_pages ?? "",
+        state: book.state || "Còn hàng",
+        form: book.form || "Sách bìa mềm",
+        category_id: book.category_id || book.category?.id || "",
+      });
     } else {
       resetForm();
     }
@@ -125,29 +141,43 @@ export const BookForm = ({
       // Tạo FormData để xử lý file upload
       const submitData = new FormData();
 
-      // Thêm tất cả các field vào FormData
-      Object.keys(formData).forEach((key) => {
+      // Chỉ append các field hợp lệ, bỏ qua nested objects hoặc metadata từ server
+      const allowedKeys = [
+        "title",
+        "author",
+        "price",
+        "discount_price",
+        "image",
+        "publication_date",
+        "description",
+        "language",
+        "weight_in_grams",
+        "packaging_size_cm",
+        "number_of_pages",
+        "state",
+        "form",
+        "category_id",
+      ];
+
+      allowedKeys.forEach((key) => {
+        const value = formData[key];
+        if (value === "" || value === null || value === undefined) return;
+
+        if (key === "image") {
+          // Chỉ gửi image nếu là File mới
+          if (value instanceof File) submitData.append("image", value);
+          return;
+        }
+
         if (
-          formData[key] !== "" &&
-          formData[key] !== null &&
-          formData[key] !== undefined
+          key === "price" ||
+          key === "discount_price" ||
+          key === "number_of_pages" ||
+          key === "category_id"
         ) {
-          if (key === "image" && formData[key] instanceof File) {
-            submitData.append(key, formData[key]);
-          } else {
-            // Đảm bảo các giá trị số được chuyển đổi đúng
-            if (
-              key === "price" ||
-              key === "discount_price" ||
-              key === "number_of_pages"
-            ) {
-              submitData.append(key, Number(formData[key]));
-            } else if (key === "category_id") {
-              submitData.append(key, Number(formData[key]));
-            } else {
-              submitData.append(key, formData[key]);
-            }
-          }
+          submitData.append(key, Number(value));
+        } else {
+          submitData.append(key, value);
         }
       });
 
