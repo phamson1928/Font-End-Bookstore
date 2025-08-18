@@ -3,7 +3,7 @@ import { CartProvider } from "./contexts/CartContext";
 import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
 import CartPage from "./pages/CartPage";
-import AuthorDetailPage from "./pages/AuthorDetailPage";
+import AuthorPage from "./pages/AuthorPage";
 import { useEffect } from "react";
 import api from "./api/client";
 
@@ -36,6 +36,7 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/authors" element={<AuthorPage />} />
         </Routes>
       </Router>
     </CartProvider>
