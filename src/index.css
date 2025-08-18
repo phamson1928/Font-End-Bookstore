@@ -13,3 +13,60 @@ button {
 section[id] {
   scroll-margin-top: 120px;
 }
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* độ dày thanh trượt */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* nền trong suốt để lộ rounded của modal */
+  border-radius: 9999px; /* bo góc track */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* màu thanh trượt (Slate-300 của Tailwind) */
+  border-radius: 9999px; /* làm tròn thanh trượt */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8; /* đổi màu khi hover */
+}
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #f8f9fa;
+}
+.book-card {
+  border-radius: 12px;
+  background: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.book-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15),
+    /* bóng đổ */ 0 0 12px rgba(59, 130, 246, 0.6),
+    /* glow xanh */ 0 0 24px rgba(59, 130, 246, 0.4); /* glow mềm xa hơn */
+}
+
+.modal {
+  transition: opacity 0.3s ease;
+}
+.modal-content {
+  transition: transform 0.3s ease;
+}
+.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.show .modal-content {
+  transform: translateY(0);
+}
+.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.hide .modal-content {
+  transform: translateY(-50px);
+}

@@ -53,7 +53,7 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
       className={`modal fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-40 ${modalClass}`}
       onClick={handleBackdropClick}
     >
-      <div className="modal-content bg-white  w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="modal-content bg-white  w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto custom-scrollbar rounded-2xl">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-gray-800">Chi tiết sách</h3>

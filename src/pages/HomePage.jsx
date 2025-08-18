@@ -261,7 +261,7 @@ const HomePage = () => {
         {categories.map((category) => (
           <BookSection
             key={category.id ?? category._id ?? category.slug}
-            id={category.slug ?? `cat-${category.id ?? category._id}`}
+            id={category.id ?? category._id}
             title={category.name}
             books={filteredBooks.filter(
               (book) =>

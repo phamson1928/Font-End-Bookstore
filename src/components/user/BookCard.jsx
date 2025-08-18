@@ -26,7 +26,7 @@ export const BookCard = ({ book, onClick }) => {
         )}
       </div>
       <div className="p-4">
-        <h3 className="text-gray-800 font-medium text-sm mb-1 line-clamp-2 h-10">
+        <h3 className="text-gray-800 font-bold text-base mb-1 line-clamp-2 h-10">
           {book.title}
         </h3>
         <p className="text-gray-600 text-xs mb-2">{book.author}</p>

@@ -22,7 +22,8 @@ export const Header = ({
   const { getTotalItems } = useCart();
 
   // Derive auth state from localStorage when parent does not pass values
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const storedUsername =
     typeof window !== "undefined" ? localStorage.getItem("username") || "" : "";
   const storedRole =
@@ -71,7 +72,8 @@ export const Header = ({
             {isLoggedInEffective ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700">
-                  Xin chào, <div className="text-blue-600">{usernameEffective}</div>
+                  Xin chào,{" "}
+                  <div className="text-blue-600">{usernameEffective}</div>
                 </span>
                 {String(roleEffective || "").toLowerCase() === "admin" && (
                   <Link
@@ -123,7 +125,7 @@ export const Header = ({
             {categories.map((category) => (
               <li key={category.id}>
                 <a
-                  href={`#${category.slug}`}
+                  href={`#${category.id}`}
                   className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
                 >
                   {category.name}
