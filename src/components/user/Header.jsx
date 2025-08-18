@@ -3,15 +3,15 @@ import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 
 export const Header = ({
-  showLoginModal,
-  showRegisterModal,
-  searchQuery,
-  setSearchQuery,
-  isLoggedIn,
-  username,
-  handleLogout,
-  role,
-  categories,
+  showLoginModal = () => {},
+  showRegisterModal = () => {},
+  searchQuery = "",
+  setSearchQuery = () => {},
+  isLoggedIn = false,
+  username = "",
+  handleLogout = () => {},
+  role = "",
+  categories = [],
 }) => {
   const { getTotalItems } = useCart();
 
