@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 
@@ -7,7 +7,7 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
   const modalClass = isOpen ? "show" : "hide";
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   if (!book) return null;
 
@@ -27,7 +27,6 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
 
   const handleAddToCart = () => {
     addToCart(book, quantity);
-    // Show success message
     alert(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng!`);
   };
 
@@ -36,16 +35,18 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
     alert(
       `Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng! Chuyển đến trang thanh toán...`
     );
-    // Here you would typically redirect to checkout page
     onClose();
   };
 
   const handleBackdropClick = (e) => {
-    // Only close if clicking the backdrop, not the modal content
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
+
+  const discountPercent = Math.round(
+    ((book.price - book.discount_price) / book.price) * 100
+  );
 
   return (
     <div
@@ -112,7 +113,10 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                     <span className="text-sm text-gray-600">
                       Tổng:{" "}
                       <span className="font-semibold text-red-600">
-                        {(book.price * quantity).toLocaleString()}đ
+                        đ
+                        {(book.discount_price * quantity).toLocaleString(
+                          "vi-VN"
+                        )}
                       </span>
                     </span>
                   </div>
@@ -137,15 +141,15 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
             </div>
 
             <div className="md:w-2/3 md:pl-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
                 {book.title}
-              </h2>
+              </h1>
               <p className="text-blue-600 mb-4">
                 Tác giả:{" "}
                 <button
                   onClick={() => {
                     onClose();
-                    navigate(`/author/${encodeURIComponent(book.author)}`);
+                    // navigate(`/author/${encodeURIComponent(book.author)}`);
                   }}
                   className="font-medium hover:underline hover:text-blue-800 transition duration-200"
                 >
@@ -166,11 +170,16 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
 
               <div className="mb-6">
                 <span className="text-2xl font-bold text-red-600">
-                  {book.price.toLocaleString()}đ
+                  đ{Number(book.discount_price).toLocaleString("vi-VN")}
                 </span>
-                {book.oldPrice > book.price && (
+                {book.price > book.discount_price && (
                   <span className="text-gray-500 text-lg line-through ml-3">
-                    {book.oldPrice.toLocaleString()}đ
+                    đ{Number(book.price).toLocaleString("vi-VN")}
+                  </span>
+                )}
+                {discountPercent > 0 && (
+                  <span className="bg-red-500 text-white text-xl font-bold px-2 py-1 rounded ml-4">
+                    -{discountPercent}%
                   </span>
                 )}
               </div>
@@ -188,43 +197,58 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Ngày xuất bản:</span>
-                    <span className="w-1/2 text-gray-800">
-                      {book.publishDate}
+                    <span className="w-1/2 text-blue-600 ">
+                      {book.publication_date}
                     </span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Ngôn ngữ:</span>
-                    <span className="w-1/2 text-gray-800">{book.language}</span>
+                    <span className="w-1/2 text-blue-600 ">
+                      {book.language}
+                    </span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Trọng lượng:</span>
-                    <span className="w-1/2 text-gray-800">{book.weight}</span>
+                    <span className="w-1/2 text-blue-600 ">
+                      {book.weight_in_grams}{" "}
+                      <span className="text-gray-600" fontSize="xs">
+                        gram
+                      </span>
+                    </span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">
                       Kích thước đóng gói:
                     </span>
-                    <span className="w-1/2 text-gray-800">
-                      {book.packageSize}
+                    <span className="w-1/2 text-blue-600">
+                      {book.packaging_size_cm}{" "}
+                      <span className="text-gray-600" fontSize="xs">
+                        cm
+                      </span>
                     </span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Số trang:</span>
-                    <span className="w-1/2 text-gray-800">{book.pages}</span>
+                    <span className="w-1/2 text-blue-600">
+                      {book.number_of_pages}{" "}
+                      <span className="text-gray-600" fontSize="xs">
+                        trang
+                      </span>
+                    </span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Trạng thái:</span>
-                    <span className="w-1/2 text-gray-800">{book.status}</span>
+                    <span className="w-1/2 text-blue-600">{book.state}</span>
                   </div>
 
                   <div className="flex">
                     <span className="w-1/2 text-gray-600">Kiểu sách:</span>
-                    <span className="w-1/2 text-gray-800">{book.type}</span>
+                    <span className="w-1/2 text-blue-600 ">{book.form}</span>
                   </div>
                 </div>
               </div>

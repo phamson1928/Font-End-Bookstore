@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import { Header } from "../components/user/Header";
+import { getImageUrl } from "../utils/imageUtils";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } =
@@ -87,7 +88,7 @@ const CartPage = () => {
                     <div key={item.id} className="p-6">
                       <div className="flex items-start space-x-4">
                         <img
-                          src={item.image}
+                          src={getImageUrl(item.image)}
                           alt={item.title}
                           className="w-20 h-28 object-cover rounded-lg shadow-sm"
                         />
@@ -100,7 +101,9 @@ const CartPage = () => {
                             Tác giả: {item.author}
                           </p>
                           <p className="text-xl font-semibold text-red-600 mb-4">
-                            {item.price.toLocaleString()}đ
+                            đ{Number(
+                              item?.discount_price ?? item?.price ?? 0
+                            ).toLocaleString()}
                           </p>
 
                           <div className="flex items-center justify-between">
@@ -159,7 +162,11 @@ const CartPage = () => {
                               Thành tiền:{" "}
                             </span>
                             <span className="text-lg font-semibold text-gray-800">
-                              {(item.price * item.quantity).toLocaleString()}đ
+                              đ
+                              {(
+                                Number(item?.discount_price ?? item?.price ?? 0) *
+                                Number(item?.quantity ?? 0)
+                              ).toLocaleString()}
                             </span>
                           </div>
                         </div>
@@ -180,7 +187,7 @@ const CartPage = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>Tạm tính:</span>
-                    <span>{getTotalPrice().toLocaleString()}đ</span>
+                    <span>đ{getTotalPrice().toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Phí vận chuyển:</span>
@@ -190,7 +197,7 @@ const CartPage = () => {
                     <div className="flex justify-between text-lg font-semibold text-gray-800">
                       <span>Tổng cộng:</span>
                       <span className="text-red-600">
-                        {getTotalPrice().toLocaleString()}đ
+                        đ{getTotalPrice().toLocaleString()}
                       </span>
                     </div>
                   </div>

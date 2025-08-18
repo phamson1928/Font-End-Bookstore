@@ -68,7 +68,17 @@ export const CartProvider = ({ children }) => {
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart);
-        dispatch({ type: "LOAD_CART", payload: parsedCart });
+        // Migrate legacy items to ensure discount_price exists
+        const migratedItems = Array.isArray(parsedCart)
+          ? parsedCart.map((item) => ({
+              // Ensure a stable id exists for all downstream operations
+              id: item?.id ?? item?._id,
+              ...item,
+              discount_price:
+                item?.discount_price != null ? item.discount_price : item?.price,
+            }))
+          : [];
+        dispatch({ type: "LOAD_CART", payload: migratedItems });
       } catch (error) {
         console.error("Error loading cart from localStorage:", error);
       }
@@ -84,10 +94,12 @@ export const CartProvider = ({ children }) => {
     dispatch({
       type: "ADD_TO_CART",
       payload: {
-        id: book.id,
+        id: book?.id ?? book?._id,
         title: book.title,
         author: book.author,
         price: book.price,
+        discount_price:
+          book?.discount_price != null ? book.discount_price : book.price,
         image: book.image,
         quantity: quantity,
       },
@@ -115,10 +127,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const getTotalPrice = () => {
-    return state.items.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    return state.items.reduce((total, item) => {
+      const unit = item?.discount_price != null ? item.discount_price : item.price;
+      return total + Number(unit || 0) * Number(item.quantity || 0);
+    }, 0);
   };
 
   const value = {

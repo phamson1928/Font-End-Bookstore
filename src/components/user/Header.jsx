@@ -9,11 +9,28 @@ export const Header = ({
   setSearchQuery = () => {},
   isLoggedIn = false,
   username = "",
-  handleLogout = () => {},
+  handleLogout = () => {
+    // Safe default logout behavior when not provided by parent
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "/";
+  },
   role = "",
   categories = [],
 }) => {
   const { getTotalItems } = useCart();
+
+  // Derive auth state from localStorage when parent does not pass values
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const storedUsername =
+    typeof window !== "undefined" ? localStorage.getItem("username") || "" : "";
+  const storedRole =
+    typeof window !== "undefined" ? localStorage.getItem("role") || "" : "";
+
+  const isLoggedInEffective = isLoggedIn || !!token;
+  const usernameEffective = username || storedUsername;
+  const roleEffective = role || storedRole;
 
   return (
     <header className="bg-white shadow-md">
@@ -51,12 +68,12 @@ export const Header = ({
               <span className="font-small">Tác giả</span>
             </Link>
 
-            {isLoggedIn ? (
+            {isLoggedInEffective ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-700">
-                  Xin chào, <div className="text-blue-600">{username}</div>
+                  Xin chào, <div className="text-blue-600">{usernameEffective}</div>
                 </span>
-                {String(role || "").toLowerCase() === "admin" && (
+                {String(roleEffective || "").toLowerCase() === "admin" && (
                   <Link
                     to="/admin"
                     className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md transition duration-300"

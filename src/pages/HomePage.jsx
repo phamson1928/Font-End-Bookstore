@@ -52,7 +52,9 @@ const HomePage = () => {
         setToken(data.token);
       }
       setIsLoggedIn(true);
-      setUsername(data?.user?.name || data?.user?.email || emailInput);
+      const nextUsername = data?.user?.name || data?.user?.email || emailInput;
+      setUsername(nextUsername);
+      localStorage.setItem("username", nextUsername);
       setShowLoginModal(false);
       setRole(data?.user?.role || "user");
       localStorage.setItem("role", data?.user?.role || "user");
@@ -95,7 +97,9 @@ const HomePage = () => {
       if (data?.token) {
         setToken(data.token);
         setIsLoggedIn(true);
-        setUsername(data?.user?.name || nameInput);
+        const nextUsername = data?.user?.name || nameInput;
+        setUsername(nextUsername);
+        localStorage.setItem("username", nextUsername);
         setShowRegisterModal(false);
         setRole(data?.user?.role || "user");
         localStorage.setItem("role", data?.user?.role || "user");
@@ -180,11 +184,21 @@ const HomePage = () => {
     setUsername("");
     setShowLoginModal(false);
     clearToken();
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
   };
 
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
+    // Rehydrate auth state quickly from localStorage for correct Header UI
+    const storedToken = localStorage.getItem("token");
+    setIsLoggedIn(!!storedToken);
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) setUsername(storedUsername);
+    const storedRole = localStorage.getItem("role");
+    if (storedRole) setRole(storedRole);
+
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -203,11 +217,19 @@ const HomePage = () => {
         // set categories
         if (categoriesRes) setCategories(categoriesRes.data);
 
-        // set user role nếu có token
+        // set user info nếu có token
         if (userRes) {
+          setIsLoggedIn(true);
           const nextRole = userRes.data?.user?.role || "user";
           setRole(nextRole);
           localStorage.setItem("role", nextRole);
+
+          const nextUsername =
+            userRes.data?.user?.name || userRes.data?.user?.email || "";
+          if (nextUsername) {
+            setUsername(nextUsername);
+            localStorage.setItem("username", nextUsername);
+          }
         }
       } catch (err) {
         console.error("Error fetching data:", err);
