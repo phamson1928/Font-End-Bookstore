@@ -4,6 +4,16 @@ export const BookCard = ({ book, onClick }) => {
   const discountPercent = Math.round(
     ((book.price - book.discount_price) / book.price) * 100
   );
+  const colorBgState = () => {
+    switch (book.state) {
+      case "Còn hàng":
+        return "bg-green-500";
+      case "Hết hàng":
+        return "bg-red-500";
+      default:
+        return "bg-yellow-500";
+    }
+  };
 
   return (
     <div
@@ -39,6 +49,11 @@ export const BookCard = ({ book, onClick }) => {
               đ{Number(book.price).toLocaleString("vi-VN")}
             </span>
           )}
+          <div
+            className={`ml-auto w-18 h-6 rounded-2xl flex items-center justify-center ${colorBgState()}`}
+          >
+            <span className="text-white text-xs">{book.state}</span>
+          </div>
         </div>
       </div>
     </div>
