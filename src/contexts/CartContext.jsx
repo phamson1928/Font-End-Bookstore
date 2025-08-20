@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
-import { api, getToken } from "../api";
+import { api, getToken, onTokenChange } from "../api";
 
 const CartContext = createContext();
 
@@ -126,6 +126,40 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("bookstore_cart", JSON.stringify(state.items));
   }, [state.items]);
+
+  // React to login/logout without a full page refresh
+  useEffect(() => {
+    const unsubscribe = onTokenChange(async (token) => {
+      if (token) {
+        // Logged in again -> fetch server cart
+        await fetchCart();
+      } else {
+        // Logged out -> show guest cart from localStorage or clear
+        const savedCart = localStorage.getItem("bookstore_cart");
+        if (savedCart) {
+          try {
+            const parsedCart = JSON.parse(savedCart);
+            const migratedItems = Array.isArray(parsedCart)
+              ? parsedCart.map((item) => ({
+                  id: item?.id ?? item?._id,
+                  ...item,
+                  discount_price:
+                    item?.discount_price != null
+                      ? item.discount_price
+                      : item?.price,
+                }))
+              : [];
+            dispatch({ type: "LOAD_CART", payload: migratedItems });
+          } catch {
+            dispatch({ type: "CLEAR_CART" });
+          }
+        } else {
+          dispatch({ type: "CLEAR_CART" });
+        }
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   // Fetch latest cart from server and update state
   const fetchCart = async () => {

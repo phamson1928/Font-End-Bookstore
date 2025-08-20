@@ -101,7 +101,8 @@ const CartPage = () => {
                             Tác giả: {item.author}
                           </p>
                           <p className="text-xl font-semibold text-red-600 mb-4">
-                            đ{Number(
+                            đ
+                            {Number(
                               item?.discount_price ?? item?.price ?? 0
                             ).toLocaleString()}
                           </p>
@@ -164,8 +165,9 @@ const CartPage = () => {
                             <span className="text-lg font-semibold text-gray-800">
                               đ
                               {(
-                                Number(item?.discount_price ?? item?.price ?? 0) *
-                                Number(item?.quantity ?? 0)
+                                Number(
+                                  item?.discount_price ?? item?.price ?? 0
+                                ) * Number(item?.quantity ?? 0)
                               ).toLocaleString()}
                             </span>
                           </div>
