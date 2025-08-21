@@ -9,6 +9,7 @@ export const AuthorManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState(null);
   const [stats, setStats] = useState({});
+
   const [formData, setFormData] = useState({
     name: "",
     age: "",
@@ -55,27 +56,48 @@ export const AuthorManagement = () => {
     e.preventDefault();
 
     try {
-      const submitData = new FormData();
-      submitData.append("name", formData.name);
-      submitData.append("age", Number(formData.age));
-      submitData.append("gender", formData.gender);
-      submitData.append("description", formData.description);
-      if (formData.nationality)
-        submitData.append("nationality", formData.nationality);
-      if (formData.total_work !== "")
-        submitData.append("total_work", Number(formData.total_work));
-      if (formData.image instanceof File) {
-        submitData.append("image", formData.image);
-      }
+      const isEditing = Boolean(editingAuthor);
+      const hasNewImage = formData.image instanceof File;
 
-      if (editingAuthor) {
-        await api.put(`/authors/${editingAuthor.id}`, submitData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+      if (isEditing && !hasNewImage) {
+        // Send JSON payload when updating without changing the image
+        const payload = {
+          name: formData.name,
+          age: Number(formData.age),
+          gender: formData.gender,
+          description: formData.description,
+        };
+        if (formData.nationality) payload.nationality = formData.nationality;
+        if (formData.total_work !== "")
+          payload.total_work = Number(formData.total_work);
+
+        await api.put(`/authors/${editingAuthor.id}`, payload);
       } else {
-        await api.post("/authors", submitData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        // Use multipart for create or when uploading a new image
+        const submitData = new FormData();
+        submitData.append("name", formData.name);
+        submitData.append("age", String(Number(formData.age)));
+        submitData.append("gender", formData.gender);
+        submitData.append("description", formData.description);
+        if (formData.nationality)
+          submitData.append("nationality", formData.nationality);
+        if (formData.total_work !== "")
+          submitData.append("total_work", String(Number(formData.total_work)));
+        if (hasNewImage) {
+          submitData.append("image", formData.image);
+        }
+
+        if (isEditing && hasNewImage) {
+          // Some backends don't parse multipart on PUT
+          // Use method override via POST for compatibility
+          submitData.append("_method", "PUT");
+          await api.post(`/authors/${editingAuthor.id}`, submitData);
+        } else if (isEditing) {
+          // Fallback: PUT multipart if backend supports it
+          await api.put(`/authors/${editingAuthor.id}`, submitData);
+        } else {
+          await api.post("/authors", submitData);
+        }
       }
 
       const { data } = await api.get("/authors");
@@ -162,7 +184,7 @@ export const AuthorManagement = () => {
     };
 
     fetchData();
-  }, []);
+  }, [authors]);
 
   if (loading) {
     return (
@@ -535,7 +557,8 @@ export const AuthorManagement = () => {
                       src={
                         formData.image instanceof File
                           ? URL.createObjectURL(formData.image)
-                          : formData.image
+                          : getImageUrl(formData.image) ||
+                            getBookPlaceholder(80, 80)
                       }
                       alt="Preview"
                       className="h-20 w-20 rounded-full object-cover"

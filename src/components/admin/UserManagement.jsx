@@ -30,7 +30,7 @@ export const UserManagement = () => {
     };
 
     fetchData();
-  }, []);
+  }, [users]);
 
   // Xóa user
   const handleConfirmDelete = async () => {

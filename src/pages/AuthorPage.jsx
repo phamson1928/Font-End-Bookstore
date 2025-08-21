@@ -3,8 +3,10 @@ import { Header } from "../components/user/Header";
 import { Footer } from "../components/user/Footer";
 import { api } from "../api";
 import { getImageUrl, getAuthorPlaceholder } from "../utils/imageUtils";
+// import { useNavigate } from "react-router-dom";
 
 const AuthorPage = () => {
+  // const navigate = useNavigate();
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -19,7 +21,8 @@ const AuthorPage = () => {
         setAuthors(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch authors", err?.response || err);
-        const msg = err?.response?.data?.message || "Không thể tải danh sách tác giả.";
+        const msg =
+          err?.response?.data?.message || "Không thể tải danh sách tác giả.";
         setError(msg);
       } finally {
         setLoading(false);
@@ -77,7 +80,8 @@ const AuthorPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filtered.map((author) => {
-              const avatar = getImageUrl(author.image) || getAuthorPlaceholder(96, 96);
+              const avatar =
+                getImageUrl(author.image) || getAuthorPlaceholder(96, 96);
               const genderBadge =
                 author.gender === "Nam"
                   ? "bg-blue-100 text-blue-800"
@@ -87,6 +91,7 @@ const AuthorPage = () => {
                 <div
                   key={author.id || author._id || author.name}
                   className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
+                  // onClick={() => navigate(`/author/${encodeURIComponent(author.name)}`)}
                 >
                   <div className="p-5">
                     <div className="flex items-center mb-4">
@@ -101,12 +106,16 @@ const AuthorPage = () => {
                         </h3>
                         <div className="mt-1 flex items-center space-x-2">
                           {author.gender && (
-                            <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${genderBadge}`}>
+                            <span
+                              className={`px-2 py-0.5 text-xs font-semibold rounded-full ${genderBadge}`}
+                            >
                               {author.gender}
                             </span>
                           )}
                           {author.age !== undefined && author.age !== null && (
-                            <span className="text-gray-600 text-sm">{author.age} tuổi</span>
+                            <span className="text-gray-600 text-sm">
+                              {author.age} tuổi
+                            </span>
                           )}
                         </div>
                       </div>
@@ -119,12 +128,11 @@ const AuthorPage = () => {
                           {author.nationality}
                         </span>
                       )}
-                      {typeof author.total_work === "number" && (
-                        <span className="inline-flex items-center">
-                          <i className="fas fa-book mr-1 text-gray-500"></i>
-                          {author.total_work} tác phẩm
-                        </span>
-                      )}
+
+                      <span className="inline-flex items-center">
+                        <i className="fas fa-book mr-1 text-gray-500"></i>
+                        {author.total_work} tác phẩm
+                      </span>
                     </div>
 
                     {author.description && (

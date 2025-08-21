@@ -52,7 +52,7 @@ export const CategoryManagement = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [categories]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
