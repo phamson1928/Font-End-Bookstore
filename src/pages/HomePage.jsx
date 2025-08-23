@@ -208,16 +208,9 @@ const HomePage = () => {
           api.get("/categories"),
           token ? api.get("/user") : Promise.resolve(null),
         ];
-
         const [booksRes, categoriesRes, userRes] = await Promise.all(requests);
-
-        // set books
         if (booksRes) setBooks(booksRes.data);
-
-        // set categories
         if (categoriesRes) setCategories(categoriesRes.data);
-
-        // set user info nếu có token
         if (userRes) {
           setIsLoggedIn(true);
           const nextRole = userRes.data?.user?.role || "user";
