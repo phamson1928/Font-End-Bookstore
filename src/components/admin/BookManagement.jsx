@@ -239,13 +239,8 @@ export const BookManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {book.price.toLocaleString()}đ
+                        {Number(book.price).toLocaleString("vi-VN")}đ
                       </div>
-                      {book.oldPrice && (
-                        <div className="text-sm text-gray-500 line-through">
-                          {book.oldPrice.toLocaleString()}đ
-                        </div>
-                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

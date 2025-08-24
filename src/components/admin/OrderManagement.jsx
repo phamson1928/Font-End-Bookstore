@@ -1,95 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../../api/client";
 
 export const OrderManagement = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: "#1234",
-      customer: "Nguyễn Văn A",
-      email: "nguyenvana@email.com",
-      phone: "0123456789",
-      items: [
-        { title: "Đắc Nhân Tâm", quantity: 1, price: 120000 },
-        { title: "Nhà Giả Kim", quantity: 2, price: 79000 },
-      ],
-      total: 278000,
-      status: "Đã giao",
-      orderDate: "2024-01-15",
-      deliveryDate: "2024-01-17",
-      address: "123 Đường ABC, Quận 1, TP.HCM",
-    },
-    {
-      id: "#1235",
-      customer: "Trần Thị B",
-      email: "tranthib@email.com",
-      phone: "0987654321",
-      items: [
-        { title: "Tuổi Trẻ Đáng Giá Bao Nhiêu", quantity: 1, price: 85000 },
-      ],
-      total: 85000,
-      status: "Đang xử lý",
-      orderDate: "2024-01-16",
-      deliveryDate: null,
-      address: "456 Đường XYZ, Quận 2, TP.HCM",
-    },
-    {
-      id: "#1236",
-      customer: "Lê Văn C",
-      email: "levanc@email.com",
-      phone: "0555666777",
-      items: [
-        { title: "Sapiens: Lược Sử Loài Người", quantity: 1, price: 189000 },
-      ],
-      total: 189000,
-      status: "Đã giao",
-      orderDate: "2024-01-14",
-      deliveryDate: "2024-01-16",
-      address: "789 Đường DEF, Quận 3, TP.HCM",
-    },
-  ]);
-
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
-  const [formData, setFormData] = useState({
-    status: "",
-    address: "",
-    deliveryDate: "",
-  });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/orders");
+        setOrders(res.data);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
-  const handleEdit = (order) => {
-    setEditingOrder(order);
-    setFormData({
-      status: order.status,
-      address: order.address,
-      deliveryDate: order.deliveryDate || "",
-    });
-    setShowModal(true);
-  };
-
-  const handleUpdate = (e) => {
-    e.preventDefault();
-
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === editingOrder.id
-          ? {
-              ...order,
-              ...formData,
-              deliveryDate: formData.deliveryDate || null,
-            }
-          : order
-      )
-    );
-
-    resetForm();
-  };
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/orders-stats");
+        setStats(res.data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
@@ -97,14 +44,24 @@ export const OrderManagement = () => {
     }
   };
 
+  const handleUpdate = (e) => {
+    e.preventDefault();
+    resetForm();
+  };
+
   const resetForm = () => {
-    setFormData({
-      status: "",
-      address: "",
-      deliveryDate: "",
-    });
     setEditingOrder(null);
     setShowModal(false);
+  };
+
+  const handleEdit = (order) => {
+    setEditingOrder(order);
+    setShowModal(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingOrder((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
   const getStatusColor = (status) => {
@@ -121,6 +78,15 @@ export const OrderManagement = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
+      </div>
+    );
+  }
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -158,7 +124,7 @@ export const OrderManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng đơn hàng</p>
               <p className="text-2xl font-bold text-gray-900">
-                {orders.length}
+                {stats.orderTotal || 0}
               </p>
             </div>
           </div>
@@ -184,7 +150,7 @@ export const OrderManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã giao</p>
               <p className="text-2xl font-bold text-gray-900">
-                {orders.filter((order) => order.status === "Đã giao").length}
+                {stats.deliveredOrder || 0}
               </p>
             </div>
           </div>
@@ -210,7 +176,7 @@ export const OrderManagement = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đang xử lý</p>
               <p className="text-2xl font-bold text-gray-900">
-                {orders.filter((order) => order.status === "Đang xử lý").length}
+                {stats.pendingOrder || 0}
               </p>
             </div>
           </div>
@@ -238,10 +204,7 @@ export const OrderManagement = () => {
                 Tổng doanh thu
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {orders
-                  .reduce((sum, order) => sum + order.total, 0)
-                  .toLocaleString()}
-                đ
+                đ{Number(stats.totalRevenue || 0).toLocaleString("vi-VN")}
               </p>
             </div>
           </div>
@@ -286,67 +249,72 @@ export const OrderManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {order.customer}
-                      </div>
-                      <div className="text-sm text-gray-500">{order.email}</div>
-                      <div className="text-sm text-gray-500">{order.phone}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs">
-                      {order.address}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {order.items.map((item, index) => (
-                        <div key={index} className="mb-1">
-                          {item.title} x{item.quantity}
+              {orders &&
+                orders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {order.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {order.user?.name || order.customer}
                         </div>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order.total.toLocaleString()}đ
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        order.status
-                      )}`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.orderDate).toLocaleDateString("vi-VN")}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(order)}
-                        className="text-green-600 hover:text-green-900"
+                        <div className="text-sm text-gray-500">
+                          {order.user?.email || order.email}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {order.phone}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-xs">
+                        {order.address}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900">
+                        {(order.order_items || []).map((order_item) => (
+                          <div key={order_item.id} className="mb-1">
+                            {order_item.book?.title} x{order_item.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {Number(order.total_cost ?? 0).toLocaleString("vi-VN")}đ
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          order.state
+                        )}`}
                       >
-                        Cập nhật
-                      </button>
-                      <button
-                        onClick={() => handleDelete(order.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        {order.state}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(order)}
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          Cập nhật
+                        </button>
+                        <button
+                          onClick={() => handleDelete(order.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -406,14 +374,14 @@ export const OrderManagement = () => {
                 </p>
                 <p>
                   <span className="font-medium">Tổng tiền:</span>{" "}
-                  {editingOrder?.total.toLocaleString()}đ
+                  {(editingOrder?.total ?? 0).toLocaleString()}đ
                 </p>
                 <div>
                   <span className="font-medium">Sản phẩm:</span>
                   <ul className="ml-4 mt-1">
-                    {editingOrder?.items.map((item, index) => (
+                    {editingOrder?.order_items?.map((item, index) => (
                       <li key={index}>
-                        • {item.title} x{item.quantity} -{" "}
+                        • {item.book?.title} x{item.quantity} -{" "}
                         {item.price.toLocaleString()}đ
                       </li>
                     ))}
@@ -428,8 +396,8 @@ export const OrderManagement = () => {
                   Trạng thái đơn hàng
                 </label>
                 <select
-                  name="status"
-                  value={formData.status}
+                  name="state"
+                  value={editingOrder?.state || ""}
                   onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -447,7 +415,7 @@ export const OrderManagement = () => {
                 </label>
                 <textarea
                   name="address"
-                  value={formData.address}
+                  value={editingOrder?.address || ""}
                   onChange={handleInputChange}
                   required
                   rows={3}
@@ -456,18 +424,18 @@ export const OrderManagement = () => {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ngày giao hàng (tùy chọn)
                 </label>
                 <input
                   type="date"
                   name="deliveryDate"
-                  value={formData.deliveryDate}
+                  value={order.deliveryDate}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
+              </div> */}
 
               <div className="flex space-x-3 pt-4">
                 <button

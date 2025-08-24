@@ -167,24 +167,36 @@ export const AuthorManagement = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAuthors = async () => {
       try {
         setLoading(true);
-        const [authorsRes, statsRes] = await Promise.all([
-          api.get("/authors"),
-          api.get("/authors-stats"),
-        ]);
-        setAuthors(authorsRes.data);
-        setStats(statsRes.data);
+        const res = await api.get("/authors");
+        setAuthors(res.data);
       } catch (error) {
-        console.error("Lỗi khi fetch dữ liệu:", error);
+        console.error("Lỗi khi fetch authors:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [authors]);
+    fetchAuthors();
+  }, []);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/authors-stats");
+        setStats(res.data);
+      } catch (error) {
+        console.error("Lỗi khi fetch stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   if (loading) {
     return (

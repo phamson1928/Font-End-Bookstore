@@ -11,28 +11,43 @@ export const UserManagement = () => {
 
   //Lấy thông tin thống kê users
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStats = async () => {
       try {
         setLoading(true);
-
-        const [statsRes, usersRes] = await Promise.all([
-          api.get("/users-stats"),
-          api.get("/user-index"),
-        ]);
-
-        setStats(statsRes.data);
-        setUsers(usersRes.data);
+        const res = await api.get("/users-stats");
+        setStats(res.data);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error(
+          "Error fetching stats:",
+          err.response?.data || err.message
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [users]);
+    fetchStats();
+  }, []);
 
-  // Xóa user
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/user-index");
+        setUsers(res.data);
+      } catch (err) {
+        console.error(
+          "Error fetching users:",
+          err.response?.data || err.message
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const handleConfirmDelete = async () => {
     if (!userToDelete?.id) {
       console.warn("No user selected for deletion");

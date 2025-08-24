@@ -35,7 +35,6 @@ export const CategoryManagement = () => {
     fetchCategories();
   }, []);
 
-  //Lấy thông tin thống kê categories
   useEffect(() => {
     const fetchStats = async () => {
       try {
