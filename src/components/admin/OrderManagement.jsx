@@ -7,11 +7,15 @@ export const OrderManagement = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
+  const [formData, setFormData] = useState({
+    state: "",
+    address: "",
+    // deliveryDate: "",
+  });
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        setLoading(true);
         const res = await api.get("/orders");
         setOrders(res.data);
       } catch (err) {
@@ -26,7 +30,6 @@ export const OrderManagement = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        setLoading(true);
         const res = await api.get("/orders-stats");
         setStats(res.data);
       } catch (err) {
@@ -36,17 +39,59 @@ export const OrderManagement = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [orders]);
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
+  const handleDelete = async (id) => {
+    setLoading(true);
+    try {
+      await api.delete(`/orders/${id}`);
       setOrders((prev) => prev.filter((order) => order.id !== id));
+    } catch (err) {
+      console.error(
+        "Error deleting order:",
+        err?.response?.data || err?.message || err
+      );
+      const msg =
+        (err?.response?.data &&
+          (err.response.data.message || JSON.stringify(err.response.data))) ||
+        err?.message ||
+        "Xóa đơn hàng thất bại";
+      window.alert(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUpdate = (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
-    resetForm();
+    setLoading(true);
+    try {
+      await api.put(`/orders/${editingOrder.id}`, formData);
+      // Cập nhật danh sách đơn hàng tại chỗ để phản ánh thay đổi ngay
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === editingOrder.id
+            ? { ...o, state: formData.state, address: formData.address }
+            : o
+        )
+      );
+      // Đóng modal sau khi cập nhật thành công
+      resetForm();
+    } catch (err) {
+      console.error(
+        "Error updating order:",
+        err?.response?.data || err?.message || err
+      );
+      // Thông báo lỗi để người dùng biết
+      const msg =
+        (err?.response?.data &&
+          (err.response.data.message || JSON.stringify(err.response.data))) ||
+        err?.message ||
+        "Cập nhật đơn hàng thất bại";
+      window.alert(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -54,14 +99,19 @@ export const OrderManagement = () => {
     setShowModal(false);
   };
 
-  const handleEdit = (order) => {
+  const handleOpenEdit = (order) => {
     setEditingOrder(order);
+    // Prefill form với dữ liệu hiện tại của đơn hàng để tránh required bị trống
+    setFormData({
+      state: order?.state || "Chờ xác nhận",
+      address: order?.address || "",
+    });
     setShowModal(true);
   };
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditingOrder((prev) => (prev ? { ...prev, [name]: value } : prev));
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
   const getStatusColor = (status) => {
@@ -300,7 +350,7 @@ export const OrderManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => handleEdit(order)}
+                          onClick={() => handleOpenEdit(order)}
                           className="text-green-600 hover:text-green-900"
                         >
                           Cập nhật
@@ -362,11 +412,11 @@ export const OrderManagement = () => {
               <div className="text-sm text-gray-600 space-y-1">
                 <p>
                   <span className="font-medium">Khách hàng:</span>{" "}
-                  {editingOrder?.customer}
+                  {editingOrder?.user?.name}
                 </p>
                 <p>
                   <span className="font-medium">Email:</span>{" "}
-                  {editingOrder?.email}
+                  {editingOrder?.user?.email}
                 </p>
                 <p>
                   <span className="font-medium">Điện thoại:</span>{" "}
@@ -374,7 +424,10 @@ export const OrderManagement = () => {
                 </p>
                 <p>
                   <span className="font-medium">Tổng tiền:</span>{" "}
-                  {(editingOrder?.total ?? 0).toLocaleString()}đ
+                  {Number(editingOrder?.total_cost ?? 0).toLocaleString(
+                    "vi-VN"
+                  )}
+                  đ
                 </p>
                 <div>
                   <span className="font-medium">Sản phẩm:</span>
@@ -382,7 +435,7 @@ export const OrderManagement = () => {
                     {editingOrder?.order_items?.map((item, index) => (
                       <li key={index}>
                         • {item.book?.title} x{item.quantity} -{" "}
-                        {item.price.toLocaleString()}đ
+                        {Number(item.price).toLocaleString("vi-VN")}đ
                       </li>
                     ))}
                   </ul>
@@ -397,8 +450,8 @@ export const OrderManagement = () => {
                 </label>
                 <select
                   name="state"
-                  value={editingOrder?.state || ""}
-                  onChange={handleInputChange}
+                  value={formData.state}
+                  onChange={handleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -415,8 +468,8 @@ export const OrderManagement = () => {
                 </label>
                 <textarea
                   name="address"
-                  value={editingOrder?.address || ""}
-                  onChange={handleInputChange}
+                  value={formData.address}
+                  onChange={handleChange}
                   required
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -431,8 +484,8 @@ export const OrderManagement = () => {
                 <input
                   type="date"
                   name="deliveryDate"
-                  value={order.deliveryDate}
-                  onChange={handleInputChange}
+                  value={formData.deliveryDate}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div> */}
