@@ -75,68 +75,9 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                   e.target.src = getBookPlaceholder(400, 600);
                 }}
               />
-
-              <div className="mt-6 space-y-4">
-                {/* Quantity Selector */}
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Số lượng:
-                  </label>
-                  <div className="flex items-center justify-center space-x-3">
-                    <button
-                      onClick={() => handleQuantityChange(-1)}
-                      disabled={quantity <= 1}
-                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
-                    >
-                      <i className="fas fa-minus text-sm"></i>
-                    </button>
-
-                    <input
-                      type="number"
-                      min="1"
-                      max="99"
-                      value={quantity}
-                      onChange={handleQuantityInput}
-                      className="w-16 h-10 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-
-                    <button
-                      onClick={() => handleQuantityChange(1)}
-                      disabled={quantity >= 99}
-                      className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
-                    >
-                      <i className="fas fa-plus text-sm"></i>
-                    </button>
-                  </div>
-
-                  <div className="mt-2 text-center">
-                    <span className="text-sm text-gray-600">
-                      Tổng:{" "}
-                      <span className="font-semibold text-red-600">
-                        đ
-                        {(book.discount_price * quantity).toLocaleString(
-                          "vi-VN"
-                        )}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center"
-                >
-                  <i className="fas fa-shopping-cart mr-2"></i> Thêm {quantity}{" "}
-                  sản phẩm vào giỏ hàng
-                </button>
-
-                <button
-                  onClick={handleBuyNow}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-md transition duration-300 flex items-center justify-center"
-                >
-                  <i className="fas fa-bolt mr-2"></i> Mua ngay ({quantity} sản
-                  phẩm)
-                </button>
+              <div className="bg-gray-100 p-4 rounded-lg mt-4 md:mt-6">
+                <h4 className="font-medium text-gray-800 mb-2">Mô tả:</h4>
+                <p className="text-gray-700">{book.description}</p>
               </div>
             </div>
 
@@ -184,10 +125,69 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                 )}
               </div>
 
-              <div className="bg-gray-100 p-4 rounded-lg mb-6">
-                <h4 className="font-medium text-gray-800 mb-2">Mô tả:</h4>
-                <p className="text-gray-700">{book.description}</p>
+              {/* Actions: quantity + buttons */}
+              <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Số lượng
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleQuantityChange(-1)}
+                        disabled={quantity <= 1}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                        aria-label="Giảm số lượng"
+                      >
+                        <i className="fas fa-minus text-xs"></i>
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={quantity}
+                        onChange={handleQuantityInput}
+                        className="w-14 h-8 text-center text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <button
+                        onClick={() => handleQuantityChange(1)}
+                        disabled={quantity >= 99}
+                        className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+                        aria-label="Tăng số lượng"
+                      >
+                        <i className="fas fa-plus text-xs"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="text-right sm:text-right">
+                    <span className="text-sm text-gray-600">
+                      Tổng: {" "}
+                      <span className="font-semibold text-red-600">
+                        đ
+                        {(book.discount_price * quantity).toLocaleString("vi-VN")}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 mt-4">
+                  <button
+                    onClick={handleAddToCart}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-300 flex items-center justify-center"
+                  >
+                    <i className="fas fa-shopping-cart mr-2"></i>
+                    Thêm {quantity}
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-300 flex items-center justify-center"
+                  >
+                    <i className="fas fa-bolt mr-2"></i>
+                    Mua ngay
+                  </button>
+                </div>
               </div>
+
+              
 
               <div className="border-t border-gray-200 pt-6">
                 <h4 className="font-medium text-gray-800 mb-4">
