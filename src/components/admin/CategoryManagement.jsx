@@ -153,7 +153,10 @@ export const CategoryManagement = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div
+              key={i}
+              className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+            >
               <div className="flex items-center">
                 <div className="p-2 bg-gray-100 rounded-lg">
                   <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
@@ -186,7 +189,9 @@ export const CategoryManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tổng danh mục</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Tổng danh mục
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.categoriesTotal || 0}
                 </p>
@@ -238,9 +243,11 @@ export const CategoryManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Trung bình sách/danh mục</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Trung bình sách/danh mục
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {stats.average || 0}
+                  {Number(stats.average).toFixed(2) || 0}
                 </p>
               </div>
             </div>
@@ -371,7 +378,9 @@ export const CategoryManagement = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(category.created_at).toLocaleDateString("vi-VN")}
+                        {new Date(category.created_at).toLocaleDateString(
+                          "vi-VN"
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">

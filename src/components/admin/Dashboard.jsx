@@ -203,7 +203,7 @@ export const Dashboard = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  Người dùng mới tháng này
+                  Người truy cập mới tháng này
                 </p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">
                   {stats?.newUsers ?? 0}
@@ -261,7 +261,10 @@ export const Dashboard = () => {
             </div>
           ) : revenueByMonth?.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={revenueByMonth} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <LineChart
+                data={revenueByMonth}
+                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis

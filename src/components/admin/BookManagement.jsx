@@ -30,17 +30,13 @@ export const BookManagement = () => {
     setLoading(true);
 
     try {
-      // Log FormData để debug
       console.log("[ADD] FormData contents:");
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
       }
-      // Để axios tự set Content-Type với boundary
       const response = await api.post("/books", formData);
       console.log("Book added successfully:", response.data);
-      // Fetch lại danh sách sách từ server
       await fetchBooks();
-      // Đóng form
       setShowAddForm(false);
     } catch (error) {
       console.error("Error adding book:", error);
@@ -57,8 +53,6 @@ export const BookManagement = () => {
     setLoading(true);
 
     try {
-      // Một số backend không parse multipart cho PUT
-      // -> Dùng method override: POST với _method=PUT
       if (formData instanceof FormData) {
         formData.append("_method", "PUT");
       }
@@ -73,10 +67,8 @@ export const BookManagement = () => {
 
       console.log("Book updated successfully:", response.data);
 
-      // Fetch lại danh sách sách từ server
       await fetchBooks();
 
-      // Đóng form
       setEditingBook(null);
     } catch (error) {
       console.error("Error updating book:", error);
@@ -98,8 +90,6 @@ export const BookManagement = () => {
     try {
       await api.delete(`/books/${bookId}`);
       console.log("Book deleted successfully");
-
-      // Fetch lại danh sách sách từ server
       await fetchBooks();
     } catch (error) {
       console.error("Error deleting book:", error);
@@ -132,8 +122,6 @@ export const BookManagement = () => {
     fetchCategories();
     fetchBooks();
   }, [books]);
-
-  // Loading skeletons are rendered inline; no early return
 
   return (
     <div className="space-y-6">

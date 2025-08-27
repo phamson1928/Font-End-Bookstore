@@ -191,7 +191,6 @@ const HomePage = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    // Rehydrate auth state quickly from localStorage for correct Header UI
     const storedToken = localStorage.getItem("token");
     setIsLoggedIn(!!storedToken);
     const storedUsername = localStorage.getItem("username");
