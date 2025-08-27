@@ -1,16 +1,32 @@
 import { useState } from "react";
 import api from "../../api/client";
 import { useEffect } from "react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [revenueByMonth, setRevenueByMonth] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await api.get("/dashboard-stats");
         setStats(res.data);
+        const revenueData = res.data.revenueByMonth.map((item) => ({
+          name: `Tháng ${item.month}/${item.year}`,
+          revenue: item.revenue,
+        }));
+        setRevenueByMonth(revenueData);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching stats:", err);
@@ -229,6 +245,54 @@ export const Dashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Doanh thu theo tháng - Chart */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Doanh thu theo tháng
+          </h3>
+        </div>
+        <div className="h-80">
+          {loading ? (
+            <div className="h-full animate-pulse">
+              <div className="h-8 bg-gray-100 rounded mb-3 w-1/3"></div>
+              <div className="h-64 bg-gray-100 rounded"></div>
+            </div>
+          ) : revenueByMonth?.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueByMonth} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis
+                  tickFormatter={(v) => `đ${Number(v).toLocaleString("vi-VN")}`}
+                  width={90}
+                />
+                <Tooltip
+                  formatter={(value) => [
+                    `đ${Number(value ?? 0).toLocaleString("vi-VN")}`,
+                    "Doanh thu",
+                  ]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  name="Doanh thu"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-500">
+              Không có dữ liệu
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
