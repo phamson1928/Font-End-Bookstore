@@ -224,7 +224,7 @@ export const OrderManagement = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đang xử lý</p>
+              <p className="text-sm font-medium text-gray-600">Chờ xác nhận</p>
               <p className="text-2xl font-bold text-gray-900">
                 {stats.pendingOrder || 0}
               </p>

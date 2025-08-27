@@ -1,117 +1,25 @@
-export const Dashboard = () => {
-  const stats = [
-    {
-      title: "Tổng số sách",
-      value: "156",
-      change: "+12%",
-      changeType: "positive",
-      icon: (
-        <svg
-          className="w-8 h-8 text-blue-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Đơn hàng hôm nay",
-      value: "23",
-      change: "+5%",
-      changeType: "positive",
-      icon: (
-        <svg
-          className="w-8 h-8 text-green-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Doanh thu tháng",
-      value: "45.2M",
-      change: "+8%",
-      changeType: "positive",
-      icon: (
-        <svg
-          className="w-8 h-8 text-yellow-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Người dùng mới",
-      value: "89",
-      change: "+15%",
-      changeType: "positive",
-      icon: (
-        <svg
-          className="w-8 h-8 text-purple-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-          />
-        </svg>
-      ),
-    },
-  ];
+import { useState } from "react";
+import api from "../../api/client";
+import { useEffect } from "react";
 
-  const recentOrders = [
-    {
-      id: "#1234",
-      customer: "Nguyễn Văn A",
-      amount: "120,000đ",
-      status: "Đã giao",
-    },
-    {
-      id: "#1235",
-      customer: "Trần Thị B",
-      amount: "85,000đ",
-      status: "Đang xử lý",
-    },
-    {
-      id: "#1236",
-      customer: "Lê Văn C",
-      amount: "189,000đ",
-      status: "Đã giao",
-    },
-    {
-      id: "#1237",
-      customer: "Phạm Thị D",
-      amount: "110,000đ",
-      status: "Chờ xác nhận",
-    },
-  ];
+export const Dashboard = () => {
+  const [stats, setStats] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/dashboard-stats");
+        setStats(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -120,88 +28,207 @@ export const Dashboard = () => {
         <p className="text-gray-600">Tổng quan về cửa hàng sách</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+      {/* Stats */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow p-6 animate-pulse"
+            >
+              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Doanh thu tháng này */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">
-                  {stat.title}
+                  Doanh thu tháng này
                 </p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {`đ${Number(stats?.revenueThisMonth ?? 0).toLocaleString(
+                    "vi-VN"
+                  )}`}
+                </p>
                 <p
-                  className={`text-sm ${
-                    stat.changeType === "positive"
+                  className={`text-sm mt-1 ${
+                    stats?.revenueChange == null
+                      ? "text-gray-600"
+                      : stats.revenueChange > 0
                       ? "text-green-600"
-                      : "text-red-600"
+                      : stats.revenueChange < 0
+                      ? "text-red-600"
+                      : "text-gray-600"
                   }`}
                 >
-                  {stat.change} so với tháng trước
+                  {stats?.revenueChange == null
+                    ? "—"
+                    : stats.revenueChange > 0
+                    ? "+" + stats.revenueChange + "% so với trước"
+                    : "-" + stats.revenueChange + "% so với trước"}
                 </p>
               </div>
-              <div className="p-3 bg-gray-50 rounded-lg">{stat.icon}</div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-yellow-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Recent Orders */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Đơn hàng gần đây
-          </h3>
+          {/* Tổng sách */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Tổng sách</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats?.booksTotal ?? 0}
+                </p>
+                <p
+                  className={`text-sm mt-1 ${
+                    stats?.booksTotalChange == null
+                      ? "text-gray-600"
+                      : stats.booksTotalChange > 0
+                      ? "text-green-600"
+                      : stats.booksTotalChange < 0
+                      ? "text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {stats?.booksTotalChange == null
+                    ? "—"
+                    : `${stats.booksTotalChange > 0 ? "+" : ""}${Number(
+                        stats.booksTotalChange
+                      ).toFixed(2)}% so với trước`}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Đơn hàng hôm nay */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Đơn hàng hôm nay
+                </p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats?.ordersToday ?? 0}
+                </p>
+                <p
+                  className={`text-sm mt-1 ${
+                    stats?.orderChange == null
+                      ? "text-gray-600"
+                      : stats.orderChange > 0
+                      ? "text-green-600"
+                      : stats.orderChange < 0
+                      ? "text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {stats?.orderChange == null
+                    ? "—"
+                    : stats.orderChange > 0
+                    ? "+" + stats.orderChange + "% so với trước"
+                    : "-" + stats.orderChange + "% so với trước"}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Người dùng mới tháng này */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">
+                  Người dùng mới tháng này
+                </p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {stats?.newUsers ?? 0}
+                </p>
+                <p
+                  className={`text-sm mt-1 ${
+                    stats?.userChange == null
+                      ? "text-gray-600"
+                      : stats.userChange > 0
+                      ? "text-green-600"
+                      : stats.userChange < 0
+                      ? "text-red-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {stats?.userChange == null
+                    ? "—"
+                    : stats.userChange > 0
+                    ? "+" + stats.userChange + "% so với trước"
+                    : "-" + stats.userChange + "% so với trước"}
+                </p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-purple-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Mã đơn hàng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Khách hàng
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Số tiền
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {recentOrders.map((order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {order.amount}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        order.status === "Đã giao"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "Đang xử lý"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
