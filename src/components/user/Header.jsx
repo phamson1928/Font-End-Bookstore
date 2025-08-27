@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 
@@ -19,6 +19,16 @@ export const Header = ({
   role = "",
   categories = [],
 }) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading state for auth check
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
   const { getTotalItems } = useCart();
 
   // Derive auth state from localStorage when parent does not pass values
@@ -32,6 +42,45 @@ export const Header = ({
   const isLoggedInEffective = isLoggedIn || !!token;
   const usernameEffective = username || storedUsername;
   const roleEffective = role || storedRole;
+
+  if (isLoading) {
+    return (
+      <header className="bg-white shadow-md">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between py-4">
+            {/* Logo Skeleton */}
+            <div className="flex items-center mb-4 md:mb-0">
+              <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+
+            {/* Search Bar Skeleton */}
+            <div className="w-full md:w-1/2 mb-4 md:mb-0 mx-4">
+              <div className="h-10 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+
+            {/* Auth Buttons Skeleton */}
+            <div className="flex items-center space-x-4">
+              <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+              <div className="h-10 w-10 bg-gray-200 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Categories Skeleton */}
+          <div className="py-3">
+            <div className="flex space-x-6 overflow-hidden">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="h-6 w-20 bg-gray-200 rounded animate-pulse"
+                ></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="bg-white shadow-md">
@@ -122,16 +171,23 @@ export const Header = ({
 
         <nav className="py-3 border-t border-gray-200">
           <ul className="flex space-x-6 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <li key={category.id}>
-                <a
-                  href={`#${category.id}`}
-                  className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
-                >
-                  {category.name}
-                </a>
-              </li>
-            ))}
+            {isLoading
+              ? // Skeleton for categories
+                [1, 2, 3, 4, 5].map((i) => (
+                  <li key={i}>
+                    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  </li>
+                ))
+              : categories.map((category) => (
+                  <li key={category.id}>
+                    <a
+                      href={`#${category.id}`}
+                      className="text-gray-700 hover:text-blue-600 whitespace-nowrap"
+                    >
+                      {category.name}
+                    </a>
+                  </li>
+                ))}
           </ul>
         </nav>
       </div>

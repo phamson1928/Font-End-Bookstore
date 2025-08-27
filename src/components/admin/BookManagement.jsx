@@ -131,16 +131,9 @@ export const BookManagement = () => {
     };
     fetchCategories();
     fetchBooks();
-  }, []);
+  }, [books]);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-black text-xl font-semibold">Đang tải...</p>
-      </div>
-    );
-  }
+  // Loading skeletons are rendered inline; no early return
 
   return (
     <div className="space-y-6">
@@ -162,16 +155,24 @@ export const BookManagement = () => {
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex items-center space-x-4">
           <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Tìm kiếm sách theo tên hoặc tác giả..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            {loading ? (
+              <div className="h-10 bg-gray-200 rounded-lg animate-pulse"></div>
+            ) : (
+              <input
+                type="text"
+                placeholder="Tìm kiếm sách theo tên hoặc tác giả..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            )}
           </div>
           <div className="text-sm text-gray-600">
-            {filteredBooks.length} sách được tìm thấy
+            {loading ? (
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+            ) : (
+              `${filteredBooks.length} sách được tìm thấy`
+            )}
           </div>
         </div>
       </div>
@@ -203,75 +204,103 @@ export const BookManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredBooks.map((book) => (
-                <tr key={book.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <img
-                      src={
-                        getImageUrl(book.image) || getBookPlaceholder(48, 64)
-                      }
-                      alt={book.title}
-                      className="w-12 h-16 object-cover rounded"
-                      onError={(e) => {
-                        console.log(
-                          "Image failed to load for book:",
-                          book.title,
-                          "Image path:",
-                          book.image
-                        );
-                        e.target.src = getBookPlaceholder(48, 64);
-                      }}
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {book.title}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {book.category?.name}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {book.author}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {Number(book.price).toLocaleString("vi-VN")}đ
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        book.state === "Còn hàng"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {book.state}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setEditingBook(book)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBook(book.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Xóa
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {loading
+                ? Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={`skeleton-${i}`} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="w-12 h-16 bg-gray-200 rounded animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-24 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="h-6 bg-gray-200 rounded-full w-16 animate-pulse"></div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
+                          <div className="h-8 bg-gray-200 rounded w-12 animate-pulse"></div>
+                          <div className="h-8 bg-gray-200 rounded w-12 animate-pulse"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                : filteredBooks.map((book) => (
+                    <tr key={book.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <img
+                          src={
+                            getImageUrl(book.image) ||
+                            getBookPlaceholder(48, 64)
+                          }
+                          alt={book.title}
+                          className="w-12 h-16 object-cover rounded"
+                          onError={(e) => {
+                            console.log(
+                              "Image failed to load for book:",
+                              book.title,
+                              "Image path:",
+                              book.image
+                            );
+                            e.target.src = getBookPlaceholder(48, 64);
+                          }}
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {book.title}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {book.category?.name}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {book.author}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {Number(book.price).toLocaleString("vi-VN")}đ
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            book.state === "Còn hàng"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {book.state}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => setEditingBook(book)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Sửa
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBook(book.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
