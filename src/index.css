@@ -9,6 +9,11 @@ button {
   cursor: pointer;
 }
 
+.modal-content {
+  border: 2px solid rgb(250, 232, 33);
+  border-radius: 12px;
+}
+
 /* Scroll offset to account for fixed header */
 section[id] {
   scroll-margin-top: 120px;

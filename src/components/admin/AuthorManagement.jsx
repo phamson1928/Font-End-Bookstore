@@ -103,6 +103,7 @@ export const AuthorManagement = () => {
       const { data } = await api.get("/authors");
       setAuthors(data);
       resetForm();
+      setShowModal(false);  // Close the modal after successful submission
     } catch (error) {
       console.error("Error submitting author:", error);
       if (error.response?.data?.errors) {
@@ -208,7 +209,10 @@ export const AuthorManagement = () => {
           <p className="text-gray-600">Quản lý thông tin tác giả và tác phẩm</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
         >
           <svg
