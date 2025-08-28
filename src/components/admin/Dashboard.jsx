@@ -246,11 +246,11 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* Doanh thu theo tháng - Chart */}
+      {/* Doanh thu mỗi tháng - Chart */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            Doanh thu theo tháng
+            Doanh thu mỗi tháng
           </h3>
         </div>
         <div className="h-80">

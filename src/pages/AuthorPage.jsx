@@ -3,10 +3,10 @@ import { Header } from "../components/user/Header";
 import { Footer } from "../components/user/Footer";
 import { api } from "../api";
 import { getImageUrl, getAuthorPlaceholder } from "../utils/imageUtils";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AuthorPage = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -91,7 +91,9 @@ const AuthorPage = () => {
                 <div
                   key={author.id || author._id || author.name}
                   className="bg-white rounded-xl shadow hover:shadow-lg transition overflow-hidden"
-                  // onClick={() => navigate(`/author/${encodeURIComponent(author.name)}`)}
+                  onClick={() =>
+                    navigate(`/authors/${author.id || author._id}`)
+                  }
                 >
                   <div className="p-5">
                     <div className="flex items-center mb-4">

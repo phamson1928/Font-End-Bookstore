@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
 import CartPage from "./pages/CartPage";
 import AuthorPage from "./pages/AuthorPage";
+import AuthorDetailPage from "./pages/AuthorDetailPage";
 import { useEffect } from "react";
 import api from "./api/client";
 
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/authors" element={<AuthorPage />} />
+          <Route path="/authors/:id" element={<AuthorDetailPage />} />
         </Routes>
       </Router>
     </CartProvider>
