@@ -8,11 +8,98 @@ import { api } from "../api";
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } =
     useCart();
-  const [paymentMethod, setPaymentMethod] = useState("cod"); // cod | card
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [coords, setCoords] = useState({ lat: null, lng: null });
-  const [locating, setLocating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
+  const getLocationByIP = async () => {
+    try {
+      console.log("Đang lấy vị trí dựa trên IP...");
+
+      // Thử dùng ipinfo.io trước
+      try {
+        const response = await fetch(
+          "https://ipinfo.io/json?token=7f7e6d5c4b3a2"
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Dữ liệu từ ipinfo.io:", data);
+          const { city, region, country } = data;
+          return [city, region, country].filter(Boolean).join(", ");
+        }
+      } catch (e) {
+        console.log("ipinfo.io không khả dụng, thử phương án dự phòng...", e);
+      }
+
+      // Fallback: Sử dụng ip-api.com nếu ipinfo.io bị lỗi
+      const fallbackResponse = await fetch("http://ip-api.com/json/");
+      if (fallbackResponse.ok) {
+        const data = await fallbackResponse.json();
+        console.log("Dữ liệu từ ip-api.com:", data);
+        const { city, regionName, country } = data;
+        return [city, regionName, country].filter(Boolean).join(", ");
+      }
+
+      return "";
+    } catch (error) {
+      console.error("Lỗi khi lấy vị trí từ IP:", error);
+      return "";
+    }
+  };
+
+  const handleGetLocation = async () => {
+    setIsLoading(true);
+    setLocationError("");
+
+    try {
+      // Thử lấy vị trí chính xác trước
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+            });
+          });
+
+          // Nếu lấy được vị trí chính xác, lấy địa chỉ
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json&accept-language=vi`
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.display_name) {
+              setAddress(data.display_name);
+              return;
+            }
+          }
+        } catch (error) {
+          console.log(
+            "Không thể lấy vị trí chính xác, thử lấy theo IP...",
+            error
+          );
+        }
+      }
+
+      // Nếu không lấy được vị trí chính xác, dùng IP-based location
+      const ipBasedAddress = await getLocationByIP();
+      if (ipBasedAddress) {
+        setAddress(ipBasedAddress);
+      } else {
+        setLocationError(
+          "Không thể lấy được vị trí. Vui lòng thử lại hoặc nhập thủ công."
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy vị trí:", error);
+      setLocationError("Có lỗi xảy ra khi lấy vị trí. Vui lòng thử lại.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleQuantityChange = (itemId, change) => {
     const item = items.find((item) => item.id === itemId);
@@ -36,45 +123,6 @@ const CartPage = () => {
     return /^0\d{9}$/.test(digits); // VN mobile: 10 digits starting with 0
   };
 
-  const handleUseCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-      alert("Trình duyệt không hỗ trợ xác định vị trí.");
-      return;
-    }
-    try {
-      setLocating(true);
-      const position = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-        })
-      );
-      const { latitude, longitude } = position.coords;
-      setCoords({ lat: latitude, lng: longitude });
-
-      // Reverse geocode via Nominatim (OpenStreetMap)
-      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&accept-language=vi`;
-      const res = await fetch(url, {
-        headers: {
-          "User-Agent": "book-store-frontend/1.0",
-          Accept: "application/json",
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const addr = data?.display_name || "";
-        if (addr) setAddress(addr);
-      }
-    } catch (err) {
-      console.error("Không thể lấy vị trí hoặc reverse geocode:", err);
-      alert(
-        "Không thể lấy vị trí hiện tại. Vui lòng thử lại hoặc nhập địa chỉ thủ công."
-      );
-    } finally {
-      setLocating(false);
-    }
-  };
-
   const handleCheckout = async () => {
     if (paymentMethod === "cod") {
       if (!isValidPhone(phone)) {
@@ -90,8 +138,6 @@ const CartPage = () => {
           payment_method: paymentMethod,
           phone,
           address,
-          // location_lat: coords.lat,
-          // location_lng: coords.lng,
         });
         const order = res?.data?.order;
         const message = res?.data?.message ?? "Đặt hàng thành công!";
@@ -317,9 +363,67 @@ const CartPage = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm text-gray-600 mb-1">
-                        Địa chỉ giao hàng
-                      </label>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-sm text-gray-600">
+                          Địa chỉ giao hàng
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleGetLocation}
+                          disabled={isLoading}
+                          className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400 flex items-center gap-1"
+                        >
+                          {isLoading ? (
+                            <>
+                              <svg
+                                className="animate-spin h-3 w-3 text-blue-500"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Đang lấy vị trí...
+                            </>
+                          ) : (
+                            <>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                              </svg>
+                              Lấy vị trí hiện tại
+                            </>
+                          )}
+                        </button>
+                      </div>
                       <textarea
                         rows={3}
                         placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
@@ -327,30 +431,11 @@ const CartPage = () => {
                         onChange={(e) => setAddress(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
                       />
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          type="button"
-                          onClick={handleUseCurrentLocation}
-                          disabled={locating}
-                          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-60"
-                        >
-                          <i className="fas fa-location-crosshairs mr-2"></i>
-                          {locating
-                            ? "Đang lấy vị trí..."
-                            : "Lấy vị trí hiện tại"}
-                        </button>
-                        {coords.lat && coords.lng && (
-                          <a
-                            href={`https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lng}#map=16/${coords.lat}/${coords.lng}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-                          >
-                            <i className="fas fa-map-marked-alt mr-2"></i>
-                            Xem trên bản đồ
-                          </a>
-                        )}
-                      </div>
+                      {locationError && (
+                        <p className="mt-1 text-xs text-red-600">
+                          {locationError}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

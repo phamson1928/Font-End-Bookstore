@@ -5,6 +5,7 @@ import { getImageUrl, getAuthorPlaceholder } from "../utils/imageUtils";
 import { Footer } from "../components/user/Footer";
 import { Header } from "../components/user/Header";
 import { BookSection2 } from "../components/author/BookSection2";
+import { BookDetailModal } from "../components/user/BookDetailModal";
 
 const AuthorDetailPage = () => {
   const { id } = useParams();
@@ -13,6 +14,13 @@ const AuthorDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [showBookDetail, setShowBookDetail] = useState(false);
+
+  const handleBookClick = (book) => {
+    setSelectedBook(book);
+    setShowBookDetail(true);
+  };
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -72,10 +80,12 @@ const AuthorDetailPage = () => {
     author.gender === "Nam"
       ? "bg-blue-100 text-blue-800"
       : "bg-pink-100 text-pink-800";
+  if (!author) return null; // Add early return if author is not loaded
+  
   const avatar = getImageUrl(author.image) || getAuthorPlaceholder(400, 400);
 
   // Filter books by author
-  const authorBooks = books.filter(book => book.author === author.name);
+  const authorBooks = books.filter((book) => book.author === author.name);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -169,11 +179,19 @@ const AuthorDetailPage = () => {
             </div>
           </div>
         </div>
-        
+        <BookDetailModal
+          isOpen={showBookDetail}
+          onClose={() => setShowBookDetail(false)}
+          book={selectedBook}
+        />
+
         {/* Author's Books Section */}
         {authorBooks.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden p-6">
-            <BookSection2 books={authorBooks} />
+            <BookSection2
+              books={authorBooks}
+              handleBookClick={handleBookClick}
+            />
           </div>
         )}
       </main>

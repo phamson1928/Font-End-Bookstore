@@ -28,6 +28,11 @@ export const BookSection = ({ id, title, books, handleBookClick }) => {
             spaceBetween={20}
             slidesPerView={5}
             loop={false}
+            style={{
+              padding: '10px 0',
+              margin: '-10px 0',
+              overflow: 'visible',
+            }}
             breakpoints={{
               640: { slidesPerView: 2 },
               768: { slidesPerView: 3 },
@@ -35,7 +40,13 @@ export const BookSection = ({ id, title, books, handleBookClick }) => {
             }}
           >
             {books.map((book) => (
-              <SwiperSlide key={book.id}>
+              <SwiperSlide 
+                key={book.id}
+                style={{
+                  height: 'auto',
+                  padding: '10px 0',
+                }}
+              >
                 <BookCard book={book} onClick={() => handleBookClick(book)} />
               </SwiperSlide>
             ))}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 
@@ -7,7 +7,8 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
   const modalClass = isOpen ? "show" : "hide";
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [showNotification, setShowNotification] = useState(false);
 
   if (!book) return null;
 
@@ -27,14 +28,13 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
 
   const handleAddToCart = () => {
     addToCart(book, quantity);
-    alert(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng!`);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 1600);
   };
 
   const handleBuyNow = () => {
     addToCart(book, quantity);
-    alert(
-      `Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng! Chuyển đến trang thanh toán...`
-    );
+    navigate("/cart");
     onClose();
   };
 
@@ -53,6 +53,13 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
       className={`modal fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-40 ${modalClass}`}
       onClick={handleBackdropClick}
     >
+      {showNotification && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+            Đã thêm {quantity} cuốn "{book.title}" vào giỏ hàng!
+          </div>
+        </div>
+      )}
       <div className="modal-content bg-white  w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto custom-scrollbar rounded-2xl">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -161,10 +168,12 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                   </div>
                   <div className="text-right sm:text-right">
                     <span className="text-sm text-gray-600">
-                      Tổng: {" "}
+                      Tổng:{" "}
                       <span className="font-semibold text-red-600">
                         đ
-                        {(book.discount_price * quantity).toLocaleString("vi-VN")}
+                        {(book.discount_price * quantity).toLocaleString(
+                          "vi-VN"
+                        )}
                       </span>
                     </span>
                   </div>
@@ -186,8 +195,6 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
                   </button>
                 </div>
               </div>
-
-              
 
               <div className="border-t border-gray-200 pt-6">
                 <h4 className="font-medium text-gray-800 mb-4">
