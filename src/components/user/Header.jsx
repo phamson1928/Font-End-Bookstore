@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 
@@ -19,7 +19,9 @@ export const Header = ({
   role = "",
   categories = [],
 }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     // Simulate loading state for auth check
@@ -27,8 +29,24 @@ export const Header = ({
       setIsLoading(false);
     }, 500);
 
-    return () => clearTimeout(timer);
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
+
+  const toggleDropdown = (e) => {
+    e.stopPropagation();
+    setShowDropdown(!showDropdown);
+  };
   const { getTotalItems } = useCart();
 
   // Derive auth state from localStorage when parent does not pass values
@@ -48,25 +66,18 @@ export const Header = ({
       <header className="bg-white shadow-md">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between py-4">
-            {/* Logo Skeleton */}
             <div className="flex items-center mb-4 md:mb-0">
               <div className="h-8 w-32 bg-gray-200 rounded animate-pulse"></div>
             </div>
-
-            {/* Search Bar Skeleton */}
             <div className="w-full md:w-1/2 mb-4 md:mb-0 mx-4">
               <div className="h-10 bg-gray-200 rounded-full animate-pulse"></div>
             </div>
-
-            {/* Auth Buttons Skeleton */}
             <div className="flex items-center space-x-4">
               <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse"></div>
               <div className="h-10 w-24 bg-gray-200 rounded-md animate-pulse"></div>
               <div className="h-10 w-10 bg-gray-200 rounded-full animate-pulse"></div>
             </div>
           </div>
-
-          {/* Categories Skeleton */}
           <div className="py-3">
             <div className="flex space-x-6 overflow-hidden">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -93,7 +104,7 @@ export const Header = ({
             </Link>
           </div>
 
-          <div className="w-full md:w-1/2 mb-4 md:mb-0 mr-4">
+          <div className="w-full md:w-1/3 mb-4 md:mb-0 mr-4">
             <div className="relative">
               <input
                 type="text"
@@ -109,21 +120,46 @@ export const Header = ({
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Authors Button */}
-            <Link
-              to="/authors"
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              <i className="fas fa-users mr-2"></i>
-              <span className="font-small">Tác giả</span>
-            </Link>
-
             {isLoggedInEffective ? (
               <div className="flex items-center space-x-4">
-                <span className="text-gray-700">
-                  Xin chào,{" "}
-                  <div className="text-blue-600">{usernameEffective}</div>
-                </span>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    className="flex items-center space-x-1 focus:outline-none"
+                    onClick={toggleDropdown}
+                  >
+                    <span className="text-gray-700">
+                      Xin chào,{" "}
+                      <span className="text-blue-600 hover:text-blue-800">
+                        {usernameEffective}
+                        <i
+                          className={`fas fa-chevron-${
+                            showDropdown ? "up" : "down"
+                          } ml-1 text-xs`}
+                        ></i>
+                      </span>
+                    </span>
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      <Link
+                        to="/history-order"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <i className="fas fa-history mr-2"></i>
+                        Lịch sử đơn hàng
+                      </Link>
+                    </div>
+                  )}
+                </div>
+                {/* Authors Button */}
+                <Link
+                  to="/authors"
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition duration-300 flex items-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  <i className="fas fa-users mr-2"></i>
+                  <span className="font-small">Tác giả</span>
+                </Link>
+
                 {String(roleEffective || "").toLowerCase() === "admin" && (
                   <Link
                     to="/admin"

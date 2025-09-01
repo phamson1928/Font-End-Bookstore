@@ -25,7 +25,7 @@ export const OrderManagement = () => {
       }
     };
     fetchOrders();
-  }, []);
+  }, [orders.state, orders.address]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -67,7 +67,6 @@ export const OrderManagement = () => {
     setLoading(true);
     try {
       await api.put(`/orders/${editingOrder.id}`, formData);
-      // Cập nhật danh sách đơn hàng tại chỗ để phản ánh thay đổi ngay
       setOrders((prev) =>
         prev.map((o) =>
           o.id === editingOrder.id
@@ -75,14 +74,12 @@ export const OrderManagement = () => {
             : o
         )
       );
-      // Đóng modal sau khi cập nhật thành công
       resetForm();
     } catch (err) {
       console.error(
         "Error updating order:",
         err?.response?.data || err?.message || err
       );
-      // Thông báo lỗi để người dùng biết
       const msg =
         (err?.response?.data &&
           (err.response.data.message || JSON.stringify(err.response.data))) ||
@@ -101,7 +98,6 @@ export const OrderManagement = () => {
 
   const handleOpenEdit = (order) => {
     setEditingOrder(order);
-    // Prefill form với dữ liệu hiện tại của đơn hàng để tránh required bị trống
     setFormData({
       state: order?.state || "Chờ xác nhận",
       address: order?.address || "",
@@ -120,7 +116,7 @@ export const OrderManagement = () => {
         return "bg-green-100 text-green-800";
       case "Đang xử lý":
         return "bg-yellow-100 text-yellow-800";
-      case "Chờ xác nhận":
+      case "Đang vận chuyển":
         return "bg-blue-100 text-blue-800";
       case "Đã hủy":
         return "bg-red-100 text-red-800";
@@ -128,7 +124,6 @@ export const OrderManagement = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
-
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -148,7 +143,10 @@ export const OrderManagement = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
+            <div
+              key={i}
+              className="bg-white rounded-lg shadow p-6 animate-pulse"
+            >
               <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
               <div className="h-8 bg-gray-200 rounded w-1/3 mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-2/3"></div>
@@ -175,7 +173,9 @@ export const OrderManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tổng đơn hàng</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Tổng đơn hàng
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.orderTotal || 0}
                 </p>
@@ -227,7 +227,9 @@ export const OrderManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Chờ xác nhận</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Chờ xác nhận
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.pendingOrder || 0}
                 </p>
@@ -293,6 +295,12 @@ export const OrderManagement = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Phương thức thanh toán
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái thanh toán
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ngày đặt
@@ -386,6 +394,12 @@ export const OrderManagement = () => {
                         >
                           {order.state}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {order.payment_method}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {order.payment_status}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(order.created_at).toLocaleDateString("vi-VN")}
@@ -499,7 +513,7 @@ export const OrderManagement = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="Chờ xác nhận">Chờ xác nhận</option>
-                  <option value="Đang xử lý">Đang xử lý</option>
+                  <option value="Đang vận chuyển">Đang vận chuyển</option>
                   <option value="Đã giao">Đã giao</option>
                   <option value="Đã hủy">Đã hủy</option>
                 </select>
