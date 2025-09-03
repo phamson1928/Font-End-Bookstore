@@ -41,11 +41,14 @@ const HistoryOrder = () => {
         const response = await api.get("/orders");
 
         // Ensure we're working with an array
-        const ordersData = Array.isArray(response.data?.data)
+        let ordersData = Array.isArray(response.data?.data)
           ? response.data.data
           : Array.isArray(response.data)
           ? response.data
           : [];
+
+        // Sort orders by created_at in descending order (newest first)
+        ordersData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         setOrders(ordersData);
       } catch (err) {
@@ -148,6 +151,10 @@ const HistoryOrder = () => {
   };
 
   const handleRequestChange = (order) => {
+    if (order.state === "Đã giao" || order.state === "Đã hủy") {
+      alert("Đơn hàng này không thể thay đổi thông tin!");
+      return;
+    }
     setCurrentOrder(order);
     setShowRequestModal(true);
   };
@@ -160,10 +167,8 @@ const HistoryOrder = () => {
 
     setIsSubmitting(true);
     try {
-      // Gọi API để gửi yêu cầu thay đổi
-      await api.post(`/orders/${currentOrder.id}/change-request`, {
+      await api.post(`/orders/${currentOrder.id}`, {
         note: requestNote,
-        status: "pending",
       });
 
       alert("Đã gửi yêu cầu thay đổi thông tin đơn hàng thành công!");
@@ -387,7 +392,9 @@ const HistoryOrder = () => {
                             <span className="font-medium text-gray-700">
                               Điện thoại:
                             </span>
-                            <span className="text-gray-600">{order.phone}</span>
+                            <span className="text-gray-600">
+                              0{order.phone}
+                            </span>
                           </div>
                         </div>
                       </div>
