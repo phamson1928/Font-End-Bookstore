@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Footer } from "../components/user/Footer";
 import { Header } from "../components/user/Header";
+import { toast } from "react-toastify";
 import {
   Calendar,
   Package,
@@ -40,15 +41,14 @@ const HistoryOrder = () => {
 
         const response = await api.get("/orders");
 
-        // Ensure we're working with an array
         let ordersData = Array.isArray(response.data?.data)
           ? response.data.data
           : Array.isArray(response.data)
           ? response.data
           : [];
-
-        // Sort orders by created_at in descending order (newest first)
-        ordersData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        ordersData.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
 
         setOrders(ordersData);
       } catch (err) {
@@ -152,7 +152,7 @@ const HistoryOrder = () => {
 
   const handleRequestChange = (order) => {
     if (order.state === "Đã giao" || order.state === "Đã hủy") {
-      alert("Đơn hàng này không thể thay đổi thông tin!");
+      toast.error("Đơn hàng này không thể thay đổi thông tin!");
       return;
     }
     setCurrentOrder(order);
@@ -161,22 +161,51 @@ const HistoryOrder = () => {
 
   const submitRequest = async () => {
     if (!requestNote.trim()) {
-      alert("Vui lòng nhập nội dung yêu cầu");
+      toast.info("Vui lòng nhập nội dung yêu cầu");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      await api.post(`/orders/${currentOrder.id}`, {
-        note: requestNote,
-      });
+      const response = await api.post(
+        `/orders/${currentOrder.id}/change-requests`,
+        {
+          note: requestNote,
+          order_id: currentOrder.id,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
-      alert("Đã gửi yêu cầu thay đổi thông tin đơn hàng thành công!");
+      toast.success(
+        "Đã gửi yêu cầu thay đổi thông tin đơn hàng thành công!",
+        response.data.message
+      );
       setShowRequestModal(false);
       setRequestNote("");
     } catch (error) {
       console.error("Lỗi khi gửi yêu cầu:", error);
-      alert("Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.");
+      console.log("Full error response:", error.response);
+      if (error.response?.status === 422) {
+        const errors = error.response.data.errors || {};
+        const firstError =
+          Object.values(errors)[0]?.[0] || "Dữ liệu không hợp lệ";
+        toast.error(`Lỗi: ${firstError}`);
+      } else if (error.response?.status === 403) {
+        if (error.response?.data?.message === "Unauthenticated.") {
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+        toast.error("Bạn không có quyền thực hiện hành động này.");
+      } else {
+        const errorMessage =
+          error.response?.data?.message ||
+          "Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.";
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }

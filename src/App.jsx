@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import HomePage from "./pages/HomePage";
 import AdminPage from "./pages/AdminPage";
 import CartPage from "./pages/CartPage";
@@ -42,6 +44,18 @@ const App = () => {
           <Route path="/authors/:id" element={<AuthorDetailPage />} />
           <Route path="/history-order" element={<HistoryOrder />} />
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </Router>
     </CartProvider>
   );

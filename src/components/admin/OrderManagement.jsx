@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import api from "../../api/client";
 
 export const OrderManagement = () => {
@@ -56,7 +57,7 @@ export const OrderManagement = () => {
           (err.response.data.message || JSON.stringify(err.response.data))) ||
         err?.message ||
         "Xóa đơn hàng thất bại";
-      window.alert(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ export const OrderManagement = () => {
           (err.response.data.message || JSON.stringify(err.response.data))) ||
         err?.message ||
         "Cập nhật đơn hàng thất bại";
-      window.alert(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -287,7 +288,7 @@ export const OrderManagement = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Địa chỉ
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[300px] w-1/4">
                   Sản phẩm
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -375,10 +376,15 @@ export const OrderManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          {(order.order_items || []).map((order_item) => (
-                            <div key={order_item.id} className="mb-1">
-                              {order_item.book?.title} x{order_item.quantity}
+                        <div className="flex flex-col space-y-2">
+                          {order.order_items.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="text-sm text-gray-900 flex items-start"
+                            >
+                              <span className="truncate max-w-[300px]">
+                                {item.book.title} x {item.quantity}
+                              </span>
                             </div>
                           ))}
                         </div>

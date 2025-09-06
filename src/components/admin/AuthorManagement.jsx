@@ -31,14 +31,12 @@ export const AuthorManagement = () => {
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         alert("Vui lòng chọn file hình ảnh hợp lệ");
         e.target.value = "";
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert("File hình ảnh không được lớn hơn 5MB");
         e.target.value = "";
@@ -60,7 +58,6 @@ export const AuthorManagement = () => {
       const hasNewImage = formData.image instanceof File;
 
       if (isEditing && !hasNewImage) {
-        // Send JSON payload when updating without changing the image
         const payload = {
           name: formData.name,
           age: Number(formData.age),
@@ -73,7 +70,6 @@ export const AuthorManagement = () => {
 
         await api.put(`/authors/${editingAuthor.id}`, payload);
       } else {
-        // Use multipart for create or when uploading a new image
         const submitData = new FormData();
         submitData.append("name", formData.name);
         submitData.append("age", String(Number(formData.age)));
@@ -88,12 +84,9 @@ export const AuthorManagement = () => {
         }
 
         if (isEditing && hasNewImage) {
-          // Some backends don't parse multipart on PUT
-          // Use method override via POST for compatibility
           submitData.append("_method", "PUT");
           await api.post(`/authors/${editingAuthor.id}`, submitData);
         } else if (isEditing) {
-          // Fallback: PUT multipart if backend supports it
           await api.put(`/authors/${editingAuthor.id}`, submitData);
         } else {
           await api.post("/authors", submitData);
@@ -103,7 +96,7 @@ export const AuthorManagement = () => {
       const { data } = await api.get("/authors");
       setAuthors(data);
       resetForm();
-      setShowModal(false);  // Close the modal after successful submission
+      setShowModal(false);
     } catch (error) {
       console.error("Error submitting author:", error);
       if (error.response?.data?.errors) {
@@ -269,7 +262,9 @@ export const AuthorManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Tổng tác giả</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Tổng tác giả
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.authorsTotal || 0}
                 </p>
@@ -295,7 +290,9 @@ export const AuthorManagement = () => {
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Sách hiện có</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Sách hiện có
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.booksTotal || 0}
                 </p>

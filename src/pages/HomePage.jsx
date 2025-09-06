@@ -9,6 +9,7 @@ import { RegisterModal } from "../components/user/RegisterModal";
 import { ForgotPasswordModal } from "../components/user/ForgotPasswordModal";
 import { ResetPasswordModal } from "../components/user/ResetPasswordModal";
 import { api, setToken, clearToken } from "../api";
+import { toast } from "react-toastify";
 
 const HomePage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -64,7 +65,7 @@ const HomePage = () => {
       console.error("Login failed", { status, data, err });
       const serverMsg =
         typeof data === "string" ? data : data?.message || data?.error;
-      alert(serverMsg || "Đăng nhập thất bại. Vui lòng thử lại.");
+      toast.error(serverMsg || "Đăng nhập thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -76,14 +77,12 @@ const HomePage = () => {
     const emailInput = e.target.email?.value?.trim();
 
     if (!nameInput || !passwordInput || !confirmPasswordInput || !emailInput) {
-      alert(
-        "Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu"
-      );
+      toast.error("Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu");
       return;
     }
 
     if (passwordInput !== confirmPasswordInput) {
-      alert("Mật khẩu và xác nhận mật khẩu không khớp");
+      toast.error("Mật khẩu và xác nhận mật khẩu không khớp");
       return;
     }
 
@@ -105,7 +104,7 @@ const HomePage = () => {
         localStorage.setItem("role", data?.user?.role || "user");
         return;
       }
-      alert(data?.message || "Đăng ký thành công. Vui lòng đăng nhập.");
+      toast.success(data?.message || "Đăng ký thành công. Vui lòng đăng nhập.");
       setShowRegisterModal(false);
       setShowLoginModal(true);
     } catch (err) {
@@ -114,7 +113,7 @@ const HomePage = () => {
       console.error("Register failed", { status, data, err });
       const serverMsg =
         typeof data === "string" ? data : data?.message || data?.error;
-      alert(serverMsg || "Đăng ký thất bại. Vui lòng thử lại.");
+      toast.error(serverMsg || "Đăng ký thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -122,14 +121,12 @@ const HomePage = () => {
     e.preventDefault();
     const email = e.target.email?.value?.trim();
     if (!email) {
-      alert("Vui lòng nhập email");
+      toast.error("Vui lòng nhập email");
       return;
     }
     try {
       const { data } = await api.post("/forgot-password", { email });
-      alert(
-        data?.message || "Đã gửi email đặt lại mật khẩu (nếu email tồn tại)"
-      );
+      toast.info(data?.message || "Đã gửi email đặt lại mật khẩu (nếu email tồn tại)");
       setResetEmail(email);
       setShowForgotPasswordModal(false);
       setShowResetPasswordModal(true);
@@ -139,7 +136,7 @@ const HomePage = () => {
       console.error("Forgot password failed", { status, resp, err });
       const serverMsg =
         typeof resp === "string" ? resp : resp?.message || resp?.error;
-      alert(serverMsg || "Gửi yêu cầu thất bại. Vui lòng thử lại.");
+      toast.error(serverMsg || "Gửi yêu cầu thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -150,11 +147,11 @@ const HomePage = () => {
     const password = e.target.password?.value;
     const password_confirmation = e.target.password_confirmation?.value;
     if (!email || !token || !password || !password_confirmation) {
-      alert("Vui lòng nhập đầy đủ email, token, mật khẩu và xác nhận mật khẩu");
+      toast.error("Vui lòng nhập đầy đủ email, token, mật khẩu và xác nhận mật khẩu");
       return;
     }
     if (password !== password_confirmation) {
-      alert("Mật khẩu và xác nhận mật khẩu không khớp");
+      toast.error("Mật khẩu và xác nhận mật khẩu không khớp");
       return;
     }
     try {
@@ -164,9 +161,7 @@ const HomePage = () => {
         password,
         password_confirmation,
       });
-      alert(
-        data?.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập."
-      );
+      toast.success(data?.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.");
       setShowResetPasswordModal(false);
       setShowLoginModal(true);
     } catch (err) {
@@ -175,7 +170,7 @@ const HomePage = () => {
       console.error("Reset password failed", { status, resp, err });
       const serverMsg =
         typeof resp === "string" ? resp : resp?.message || resp?.error;
-      alert(serverMsg || "Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
+      toast.error(serverMsg || "Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
     }
   };
 

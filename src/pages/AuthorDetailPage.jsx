@@ -80,8 +80,8 @@ const AuthorDetailPage = () => {
     author.gender === "Nam"
       ? "bg-blue-100 text-blue-800"
       : "bg-pink-100 text-pink-800";
-  if (!author) return null; // Add early return if author is not loaded
-  
+  if (!author) return null;
+
   const avatar = getImageUrl(author.image) || getAuthorPlaceholder(400, 400);
 
   // Filter books by author

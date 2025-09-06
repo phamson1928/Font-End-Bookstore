@@ -120,7 +120,7 @@ const CartPage = () => {
 
   const isValidPhone = (value) => {
     const digits = (value || "").replace(/\D/g, "");
-    return /^0\d{9}$/.test(digits); // VN mobile: 10 digits starting with 0
+    return /^0\d{9}$/.test(digits);
   };
 
   const handleCheckout = async () => {
