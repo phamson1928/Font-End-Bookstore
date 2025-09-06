@@ -7,6 +7,7 @@ import { OrderManagement } from "../components/admin/OrderManagement";
 import { UserManagement } from "../components/admin/UserManagement";
 import { AuthorManagement } from "../components/admin/AuthorManagement";
 import { CategoryManagement } from "../components/admin/CategoryManagement";
+import OrderChangeRequestManagement from "../components/admin/OrderChangeRequestManagement";
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -26,6 +27,8 @@ const AdminPage = () => {
         return <OrderManagement />;
       case "users":
         return <UserManagement />;
+      case "order-change-requests":
+        return <OrderChangeRequestManagement />;
       default:
         return <Dashboard />;
     }

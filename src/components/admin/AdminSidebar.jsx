@@ -102,6 +102,25 @@ export const AdminSidebar = ({ activeTab, setActiveTab, isOpen }) => {
       ),
     },
     {
+      id: "order-change-requests",
+      label: "Yêu cầu đổi thông tin đơn hàng",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 7h.01M12 7h.01M16 7h.01M4 17a2 2 0 012-2h12a2 2 0 012 2v1a2 2 0 01-2 2H6a2 2 0 01-2-2v-1z"
+          />
+        </svg>
+      ),
+    },
+    {
       id: "users",
       label: "Quản lý người dùng",
       icon: (
