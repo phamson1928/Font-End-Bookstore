@@ -10,7 +10,7 @@ button {
 }
 
 .modal-content {
-  border: 2px solid rgb(250, 232, 33);
+  border: 2px solid rgb(24, 10, 102);
   border-radius: 12px;
 }
 
@@ -19,24 +19,20 @@ section[id] {
   scroll-margin-top: 120px;
 }
 
-/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px; /* độ dày thanh trượt */
+  width: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent; /* nền trong suốt để lộ rounded của modal */
-  border-radius: 9999px; /* bo góc track */
+  background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1; /* màu thanh trượt (Slate-300 của Tailwind) */
-  border-radius: 9999px; /* làm tròn thanh trượt */
+  background: #cbd5e0; /* gray-400 */
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0; /* gray-500 */
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8; /* đổi màu khi hover */
-}
 body {
   font-family: "Roboto", sans-serif;
   background-color: #f8f9fa;

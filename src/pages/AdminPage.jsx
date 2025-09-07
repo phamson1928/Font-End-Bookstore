@@ -46,14 +46,15 @@ const AdminPage = () => {
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
         <main
           className={`flex-1 transition-all duration-300 ${
-            isSidebarOpen ? "ml-64" : "ml-0"
+            isSidebarOpen ? "ml-64" : "ml-20"
           }`}
         >
-          <div className="p-6">{renderContent()}</div>
+          <div className="p-6 transition-all duration-300">{renderContent()}</div>
         </main>
       </div>
     </div>

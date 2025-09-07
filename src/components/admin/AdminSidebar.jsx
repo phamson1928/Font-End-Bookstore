@@ -1,4 +1,4 @@
-export const AdminSidebar = ({ activeTab, setActiveTab, isOpen }) => {
+export const AdminSidebar = ({ activeTab, setActiveTab, isOpen, onToggle }) => {
   const menuItems = [
     {
       id: "dashboard",
@@ -141,48 +141,76 @@ export const AdminSidebar = ({ activeTab, setActiveTab, isOpen }) => {
     },
   ];
 
-  if (!isOpen) return null;
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg border-r border-gray-200 z-10">
-      <div className="p-6">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+    <aside className={`fixed left-0 top-0 h-full bg-white shadow-lg border-r border-gray-200 z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'}`}>
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className={`flex items-center space-x-3 ${!isOpen ? 'justify-center w-full' : ''}`}>
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+            </div>
+            {isOpen && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">BookStore</h2>
+                <p className="text-sm text-gray-600">Admin Panel</p>
+              </div>
+            )}
+          </div>
+          {isOpen && (
+            <button 
+              onClick={onToggle}
+              className="p-1 hover:bg-gray-100 rounded-md"
+              title="Thu gọn"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">BookStore</h2>
-            <p className="text-sm text-gray-600">Admin Panel</p>
-          </div>
+              <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        <nav className="space-y-2">
+        <nav className="space-y-1">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+              className={`w-full flex items-center ${isOpen ? 'justify-start space-x-3 px-4' : 'justify-center px-2'} py-3 rounded-lg text-left transition-colors ${
                 activeTab === item.id
                   ? "bg-blue-50 text-blue-700 border border-blue-200"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
+              title={isOpen ? '' : item.label}
             >
-              {item.icon}
-              <span className="font-medium">{item.label}</span>
+              <div className="flex-shrink-0">
+                {item.icon}
+              </div>
+              {isOpen && <span className="font-medium truncate">{item.label}</span>}
             </button>
           ))}
+          {!isOpen && (
+            <button 
+              onClick={onToggle}
+              className="w-full flex justify-center p-2 text-gray-500 hover:bg-gray-50 rounded-lg mt-4"
+              title="Mở rộng"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
         </nav>
       </div>
     </aside>
