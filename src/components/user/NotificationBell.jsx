@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { BellIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 
 const NotificationBell = () => {
   // Sample notification data - replace with real data from your backend
@@ -93,12 +94,12 @@ const NotificationBell = () => {
             )}
           </div>
           <div className="bg-gray-50 px-4 py-2 text-center">
-            <a 
-              href="/thong-bao" 
-              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+            <Link 
+              to="/thong-bao" 
+              className="text-sm font-medium text-blue-600 hover:text-blue-800 block py-2"
             >
               Xem tất cả thông báo
-            </a>
+            </Link>
           </div>
         </Menu.Items>
       </Transition>

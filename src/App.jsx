@@ -7,7 +7,8 @@ import AdminPage from "./pages/AdminPage";
 import CartPage from "./pages/CartPage";
 import AuthorPage from "./pages/AuthorPage";
 import AuthorDetailPage from "./pages/AuthorDetailPage";
-import HistoryOrder from "./pages/HistoryOrder";
+import HistoryOrder from "./pages/HistoryOrderPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import { useEffect } from "react";
 import api from "./api/client";
 
@@ -43,6 +44,7 @@ const App = () => {
           <Route path="/authors" element={<AuthorPage />} />
           <Route path="/authors/:id" element={<AuthorDetailPage />} />
           <Route path="/history-order" element={<HistoryOrder />} />
+          <Route path="/thong-bao" element={<NotificationsPage />} />
         </Routes>
         <ToastContainer
           position="top-right"
