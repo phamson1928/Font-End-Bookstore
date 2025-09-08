@@ -29,6 +29,7 @@ const HistoryOrder = () => {
   const [currentOrder, setCurrentOrder] = useState(null);
   const [requestNote, setRequestNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [adminResponses, setAdminResponses] = useState({});
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -211,6 +212,48 @@ const HistoryOrder = () => {
     }
   };
 
+  const toggleOrderExpand = async (orderId) => {
+    if (expandedOrder === orderId) {
+      setExpandedOrder(null);
+      return;
+    }
+
+    setExpandedOrder(orderId);
+
+    // Only fetch if we haven't fetched before
+    if (!adminResponses[orderId] && adminResponses[orderId] !== null) {
+      try {
+        console.log(`Fetching admin response for order ${orderId}`);
+        const response = await api.get(`/orders/${orderId}/change-requests`);
+
+        if (response.data && response.data.admin_response) {
+          setAdminResponses((prev) => ({
+            ...prev,
+            [orderId]: response.data.admin_response,
+          }));
+        } else {
+          // Store null to prevent refetching
+          setAdminResponses((prev) => ({
+            ...prev,
+            [orderId]: null,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching admin response for order", orderId, ":", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+
+        // Store null to prevent refetching
+        setAdminResponses((prev) => ({
+          ...prev,
+          [orderId]: null,
+        }));
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -326,11 +369,7 @@ const HistoryOrder = () => {
                     <div className="flex items-center gap-4">
                       <StatusBadge state={order.state} />
                       <button
-                        onClick={() =>
-                          setExpandedOrder(
-                            expandedOrder === order.id ? null : order.id
-                          )
-                        }
+                        onClick={() => toggleOrderExpand(order.id)}
                         className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                       >
                         <Eye size={16} />
@@ -393,6 +432,45 @@ const HistoryOrder = () => {
                   {/* Expanded Details */}
                   {expandedOrder === order.id && (
                     <div className="space-y-6 border-t border-gray-100 pt-6">
+                      {/* Customer Info */}
+                      {/* Admin Response */}
+                      {(order.admin_response || adminResponses[order.id]) && (
+                        <div className="bg-blue-50 border-l-4 border-blue-400 rounded-r-lg p-4 mb-4">
+                          <div className="flex">
+                            <div className="flex-shrink-0">
+                              <svg
+                                className="h-5 w-5 text-blue-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 100 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                            <div className="ml-3">
+                              <h4 className="text-sm font-medium text-blue-800">
+                                Phản hồi từ quản trị viên
+                              </h4>
+                              <div className="mt-1 text-sm text-blue-700">
+                                <p>
+                                  {order.admin_response ||
+                                    adminResponses[order.id]}
+                                </p>
+                              </div>
+                              {order.updated_at && (
+                                <div className="mt-1 text-xs text-blue-600">
+                                  Cập nhật lúc: {formatDate(order.updated_at)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Customer Info */}
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
