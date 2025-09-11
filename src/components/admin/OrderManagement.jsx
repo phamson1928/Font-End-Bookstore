@@ -27,6 +27,7 @@ export const OrderManagement = () => {
   const [formData, setFormData] = useState({
     state: "",
     address: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -93,7 +94,12 @@ export const OrderManagement = () => {
       setOrders((prev) =>
         prev.map((o) =>
           o.id === editingOrder.id
-            ? { ...o, state: formData.state, address: formData.address }
+            ? { 
+                ...o, 
+                state: formData.state, 
+                address: formData.address,
+                phone: formData.phone 
+              }
             : o
         )
       );
@@ -124,6 +130,7 @@ export const OrderManagement = () => {
     setFormData({
       state: order?.state || "Chờ xác nhận",
       address: order?.address || "",
+      phone: order?.phone || "",
     });
     setShowModal(true);
   };
@@ -457,6 +464,20 @@ export const OrderManagement = () => {
                       <option value="Đã giao">Đã giao</option>
                       <option value="Đã hủy">Đã hủy</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Số điện thoại
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nhập số điện thoại"
+                    />
                   </div>
 
                   <div>

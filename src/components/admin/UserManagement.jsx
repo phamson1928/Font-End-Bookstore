@@ -12,8 +12,6 @@ import {
   Mail,
   Calendar,
   Activity,
-  ChevronLeft,
-  ChevronRight,
   BarChart3,
 } from "lucide-react";
 
@@ -23,8 +21,6 @@ export const UserManagement = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [isStatsCollapsed, setIsStatsCollapsed] = useState(false);
-  const [isTableCollapsed, setIsTableCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -105,245 +101,180 @@ export const UserManagement = () => {
       : "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300";
   };
 
-  const LoadingSkeleton = () => (
-    <div className="flex gap-4 h-screen overflow-hidden">
-      {/* Stats Section Skeleton */}
-      <div
-        className={`transition-all duration-300 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 ${
-          isStatsCollapsed ? "w-16" : "w-80"
-        }`}
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className={`${isStatsCollapsed ? "hidden" : "block"}`}>
-              <div className="h-6 bg-gray-200 rounded w-32 mb-2 animate-pulse"></div>
-            </div>
-            <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Header Skeleton */}
+          <div className="mb-6">
+            <div className="h-8 bg-gradient-to-r from-slate-200 to-slate-300 rounded-xl w-64 mb-2 animate-pulse"></div>
+            <div className="h-5 bg-gradient-to-r from-slate-200 to-slate-300 rounded-lg w-96 animate-pulse"></div>
           </div>
 
-          <div className={`space-y-4 ${isStatsCollapsed ? "hidden" : "block"}`}>
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-xl border border-gray-100 p-4"
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-white/50 animate-pulse"
               >
                 <div className="flex items-center">
-                  <div className="p-3 bg-gray-100 rounded-lg">
-                    <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="p-3 bg-gradient-to-r from-slate-200 to-slate-300 rounded-xl">
+                    <div className="w-5 h-5 bg-slate-300 rounded"></div>
                   </div>
                   <div className="ml-3 flex-1">
-                    <div className="h-3 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
-                    <div className="h-6 bg-gray-300 rounded w-12 animate-pulse"></div>
+                    <div className="h-3 bg-slate-200 rounded w-20 mb-2"></div>
+                    <div className="h-6 bg-slate-300 rounded w-12"></div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
 
-      {/* Table Section Skeleton */}
-      <div className="flex-1 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100">
-        <div className="p-6 border-b border-gray-200">
-          <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+          {/* Table Skeleton */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-6">
+            <div className="h-6 bg-slate-200 rounded w-48 mb-6 animate-pulse"></div>
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 bg-slate-100 rounded-xl animate-pulse"
+                ></div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="p-6 space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-16 bg-gray-100 rounded-xl animate-pulse"
-            ></div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  if (loading) {
-    return (
-      <div className="p-6">
-        <LoadingSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-          Quản lý người dùng
-        </h2>
-        <p className="text-gray-600 text-lg">
-          Quản lý tài khoản người dùng và phân quyền
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Compact Header */}
+        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-blue-600 bg-clip-text text-transparent mb-2">
+            Quản lý người dùng
+          </h2>
+          <p className="text-slate-600">
+            Quản lý tài khoản người dùng và phân quyền
+          </p>
+        </div>
 
-      <div className="flex gap-6 h-[calc(100vh-200px)] overflow-hidden">
-        {/* Stats Section - Collapsible */}
-        <div
-          className={`transition-all duration-300 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 ${
-            isStatsCollapsed ? "w-20" : "w-80"
-          }`}
-        >
-          <div className="p-6 h-full overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className={`${isStatsCollapsed ? "hidden" : "block"}`}>
-                <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                  <BarChart3 className="mr-2" size={20} />
-                  Thống kê
-                </h3>
+        {/* Compact Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-5 h-5 text-white" />
               </div>
-              <button
-                onClick={() => setIsStatsCollapsed(!isStatsCollapsed)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
-              >
-                {isStatsCollapsed ? (
-                  <ChevronRight size={20} className="text-gray-600" />
-                ) : (
-                  <ChevronLeft size={20} className="text-gray-600" />
-                )}
-              </button>
+              <div className="ml-3 flex-1">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  Tổng người dùng
+                </p>
+                <p className="text-xl font-bold text-slate-900">
+                  {stats.userUsers}
+                </p>
+              </div>
             </div>
+          </div>
 
-            {/* Collapsed Stats Icons */}
-            {isStatsCollapsed ? (
-              <div className="space-y-4">
-                <div
-                  className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg flex items-center justify-center"
-                  title="Tổng người dùng"
-                >
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div
-                  className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg flex items-center justify-center"
-                  title="Đang hoạt động"
-                >
-                  <UserCheck className="w-6 h-6 text-white" />
-                </div>
-                <div
-                  className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center"
-                  title="Quản trị viên"
-                >
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div
-                  className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg flex items-center justify-center"
-                  title="Mới hôm nay"
-                >
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center">
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <UserCheck className="w-5 h-5 text-white" />
               </div>
-            ) : (
-              /* Expanded Stats Cards */
-              <div className="space-y-4">
-                <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-lg border border-blue-100 p-4 hover:shadow-xl transition-all duration-200">
-                  <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg">
-                      <Users className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">
-                        Tổng người dùng
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats.userUsers}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl shadow-lg border border-emerald-100 p-4 hover:shadow-xl transition-all duration-200">
-                  <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg shadow-lg">
-                      <UserCheck className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">
-                        Đang hoạt động
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats.onlineUsers}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl shadow-lg border border-purple-100 p-4 hover:shadow-xl transition-all duration-200">
-                  <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg">
-                      <Shield className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">
-                        Quản trị viên
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats.adminUsers}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-white to-amber-50 rounded-xl shadow-lg border border-amber-100 p-4 hover:shadow-xl transition-all duration-200">
-                  <div className="flex items-center">
-                    <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg">
-                      <Clock className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <p className="text-xs font-semibold text-gray-600 mb-1">
-                        Mới hôm nay
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {stats.newUsers}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="ml-3 flex-1">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  Đang hoạt động
+                </p>
+                <p className="text-xl font-bold text-slate-900">
+                  {stats.onlineUsers}
+                </p>
               </div>
-            )}
+            </div>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Shield className="w-5 h-5 text-white" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  Quản trị viên
+                </p>
+                <p className="text-xl font-bold text-slate-900">
+                  {stats.adminUsers}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 hover:shadow-xl transition-all duration-300 group">
+            <div className="flex items-center">
+              <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Clock className="w-5 h-5 text-white" />
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  Mới hôm nay
+                </p>
+                <p className="text-xl font-bold text-slate-900">
+                  {stats.newUsers}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Users Table Section */}
-        <div className="flex-1 bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col">
-          <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 flex-shrink-0">
+        {/* Compact Users Table */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                <Users className="mr-3" size={24} />
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <Users className="mr-2" size={20} />
                 Danh sách người dùng
               </h3>
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full border">
-                  {users.length} người dùng
-                </span>
-                <button
-                  onClick={() => setIsTableCollapsed(!isTableCollapsed)}
-                  className="p-2 hover:bg-white/60 rounded-xl transition-all duration-200"
-                  title={isTableCollapsed ? "Mở rộng bảng" : "Thu gọn bảng"}
-                >
-                  {isTableCollapsed ? (
-                    <ChevronRight size={20} className="text-gray-600" />
-                  ) : (
-                    <ChevronLeft size={20} className="text-gray-600" />
-                  )}
-                </button>
-              </div>
+              <span className="text-sm text-slate-600 bg-white px-3 py-1 rounded-full border">
+                {users.length} người dùng
+              </span>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            {isTableCollapsed ? (
-              /* Collapsed Table View - Compact Cards */
-              <div className="p-6 space-y-3">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-slate-50 to-blue-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Người dùng
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Vai trò
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Trạng thái
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Tham gia
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
                 {users.map((user) => (
-                  <div
+                  <tr
                     key={user.id}
-                    className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-all duration-200"
+                    className="hover:bg-gradient-to-r hover:from-slate-50/50 hover:to-blue-50/30 transition-all duration-200 group"
                   >
-                    <div className="flex items-center justify-between">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow duration-200">
                           <span className="text-xs font-bold text-white">
                             {user.name
                               .split(" ")
@@ -352,202 +283,101 @@ export const UserManagement = () => {
                               .toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            {user.name}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {user.email}
-                          </div>
+                        <div className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 transition-colors">
+                          {user.name}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 text-xs font-bold rounded-full ${getRoleColor(
-                            user.role
-                          )}`}
-                        >
-                          {user.role === "admin" ? "Admin" : "User"}
-                        </span>
-                        <button
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                          onClick={() => handleDeleteClick(user)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-600 font-medium">
+                        {user.email}
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* Expanded Table View */
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-100">
-                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100 sticky top-0">
-                    <tr>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Người dùng
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Thông tin liên hệ
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Vai trò
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Trạng thái
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Ngày tham gia
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Đăng nhập cuối
-                      </th>
-                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        Thao tác
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-50">
-                    {users.map((user) => (
-                      <tr
-                        key={user.id}
-                        className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200"
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 text-xs font-bold rounded-full shadow-sm ${getRoleColor(
+                          user.role
+                        )}`}
                       >
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                              <span className="text-sm font-bold text-white">
-                                {user.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()}
-                              </span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-gray-900 flex items-center">
-                                <User
-                                  size={14}
-                                  className="mr-2 text-gray-400"
-                                />
-                                {user.name}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <Mail size={14} className="mr-2 text-gray-400" />
-                            <div className="text-sm text-gray-900">
-                              {user.email}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${getRoleColor(
-                              user.role
-                            )}`}
-                          >
-                            <Shield size={12} className="mr-1" />
-                            {user.role === "admin"
-                              ? "Quản trị viên"
-                              : "Khách hàng"}
-                          </span>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full ${getStatusColor(
-                              user.last_seen
-                            )}`}
-                          >
-                            <Activity size={12} className="mr-1" />
-                            {user.last_seen
-                              ? "Đang hoạt động"
-                              : "Không hoạt động"}
-                          </span>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Calendar
-                              size={14}
-                              className="mr-2 text-gray-400"
-                            />
-                            {dayjs(user.created_at).format("DD/MM/YYYY")}
-                          </div>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Clock size={14} className="mr-2 text-gray-400" />
-                            {user.last_login_at == null
-                              ? "Chưa đăng nhập lại"
-                              : dayjs(user.last_login_at).format("DD/MM/YYYY")}
-                          </div>
-                        </td>
-                        <td className="px-8 py-6 whitespace-nowrap">
-                          <button
-                            className="flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium text-sm transition-all duration-200 hover:scale-105"
-                            onClick={() => handleDeleteClick(user)}
-                          >
-                            <Trash2 size={14} className="mr-1" />
-                            Xóa
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                        <Shield size={10} className="mr-1" />
+                        {user.role === "admin" ? "Admin" : "User"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 text-xs font-bold rounded-full shadow-sm ${getStatusColor(
+                          user.last_seen
+                        )}`}
+                      >
+                        <Activity size={10} className="mr-1" />
+                        {user.last_seen ? "Hoạt động" : "Offline"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-600 font-medium">
+                        {dayjs(user.created_at).format("DD/MM/YY")}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <button
+                        className="flex items-center px-2 py-1 text-red-600 hover:bg-red-50 rounded-lg text-sm transition-all duration-200 hover:scale-105"
+                        onClick={() => handleDeleteClick(user)}
+                      >
+                        <Trash2 size={12} className="mr-1" />
+                        Xóa
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Compact Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/40">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                <Trash2 className="mr-3 text-red-600" size={24} />
-                Xác nhận xóa người dùng
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-md bg-black/40 p-4">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-white/50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                <Trash2 className="mr-2 text-red-600" size={20} />
+                Xóa người dùng
               </h3>
               <button
                 onClick={handleCancelDelete}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200"
+                className="p-1 hover:bg-slate-100 rounded-lg transition-all duration-200"
               >
-                <X size={20} className="text-gray-500" />
+                <X size={16} className="text-slate-500" />
               </button>
             </div>
 
-            <div className="mb-8">
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-                <p className="text-gray-700">
-                  Bạn có chắc chắn muốn xóa người dùng
+            <div className="mb-6">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-3">
+                <p className="text-sm text-slate-700">
+                  Bạn có chắc chắn muốn xóa
                 </p>
-                <p className="font-bold text-red-800 mt-1">
-                  {userToDelete?.name}
+                <p className="font-bold text-red-800 text-sm">
+                  {userToDelete?.name}?
                 </p>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-slate-600">
                 Hành động này không thể hoàn tác.
               </p>
             </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex gap-3">
               <button
-                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 font-medium transition-all duration-200"
+                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-medium text-sm transition-all duration-200"
                 onClick={handleCancelDelete}
               >
                 Hủy
               </button>
               <button
-                className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 font-medium shadow-lg shadow-red-200 hover:shadow-red-300 transition-all duration-200 hover:scale-105"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 font-medium text-sm shadow-lg transition-all duration-200 hover:scale-105"
                 onClick={handleConfirmDelete}
               >
-                Xóa người dùng
+                Xóa
               </button>
             </div>
           </div>
