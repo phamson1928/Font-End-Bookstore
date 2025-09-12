@@ -1,3 +1,5 @@
+import { FaBell } from 'react-icons/fa';
+
 export const AdminSidebar = ({ activeTab, setActiveTab, isOpen, onToggle }) => {
   const menuItems = [
     {
@@ -119,6 +121,11 @@ export const AdminSidebar = ({ activeTab, setActiveTab, isOpen, onToggle }) => {
           />
         </svg>
       ),
+    },
+    {
+      id: "notifications",
+      label: "Quản lý thông báo",
+      icon: <FaBell className="w-5 h-5" />,
     },
     {
       id: "users",
