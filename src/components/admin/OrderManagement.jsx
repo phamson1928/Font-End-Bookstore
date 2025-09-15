@@ -14,6 +14,11 @@ import {
   User,
   Phone,
   MapPin,
+  Package,
+  Calendar,
+  CreditCard,
+  Tag,
+  TrendingUp,
 } from "lucide-react";
 
 export const OrderManagement = () => {
@@ -94,11 +99,11 @@ export const OrderManagement = () => {
       setOrders((prev) =>
         prev.map((o) =>
           o.id === editingOrder.id
-            ? { 
-                ...o, 
-                state: formData.state, 
+            ? {
+                ...o,
+                state: formData.state,
                 address: formData.address,
-                phone: formData.phone 
+                phone: formData.phone,
               }
             : o
         )
@@ -143,15 +148,30 @@ export const OrderManagement = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case "Đã giao":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 shadow-sm";
       case "Đang xử lý":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200 shadow-sm";
       case "Đang vận chuyển":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 shadow-sm";
       case "Đã hủy":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border border-rose-200 shadow-sm";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gradient-to-r from-slate-50 to-gray-50 text-slate-700 border border-slate-200 shadow-sm";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Đã giao":
+        return <CheckCircle size={12} className="mr-1" />;
+      case "Đang xử lý":
+        return <Clock size={12} className="mr-1" />;
+      case "Đang vận chuyển":
+        return <Package size={12} className="mr-1" />;
+      case "Đã hủy":
+        return <X size={12} className="mr-1" />;
+      default:
+        return <Clock size={12} className="mr-1" />;
     }
   };
 
@@ -163,136 +183,171 @@ export const OrderManagement = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50 p-4">
+    <div className="h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
       <div className="h-full flex flex-col max-w-full">
-        {/* Compact Header */}
-        <div className="bg-white rounded-xl shadow-sm border p-4 mb-4">
+        {/* Elegant Header */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 mb-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Quản lý đơn hàng
-              </h2>
-              <p className="text-sm text-gray-600">
-                Theo dõi và quản lý đơn hàng
-              </p>
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                <ShoppingBag className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                  Quản lý đơn hàng
+                </h2>
+                <p className="text-slate-600 mt-1">
+                  Theo dõi và quản lý đơn hàng một cách hiệu quả
+                </p>
+              </div>
             </div>
             <button
               onClick={() => setIsStatsCollapsed(!isStatsCollapsed)}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-3 hover:bg-white/60 rounded-xl transition-all duration-200 group"
             >
               {isStatsCollapsed ? (
-                <ChevronDown size={20} />
+                <ChevronDown
+                  size={20}
+                  className="text-slate-600 group-hover:text-blue-600"
+                />
               ) : (
-                <ChevronUp size={20} />
+                <ChevronUp
+                  size={20}
+                  className="text-slate-600 group-hover:text-blue-600"
+                />
               )}
             </button>
           </div>
         </div>
 
-        {/* Collapsible Stats */}
+        {/* Elegant Stats Cards */}
         {!isStatsCollapsed && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {loading ? (
               [...Array(4)].map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl p-4 shadow-sm border animate-pulse"
+                  className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 animate-pulse"
                 >
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                  <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full mb-3"></div>
+                  <div className="h-8 bg-gradient-to-r from-slate-300 to-slate-400 rounded-full w-3/4"></div>
                 </div>
               ))
             ) : (
               <>
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100">
-                  <div className="flex items-center">
-                    <ShoppingBag className="w-6 h-6 text-blue-600 mr-3" />
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Tổng đơn</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {stats.orderTotal || 0}
-                      </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 hover:shadow-xl hover:bg-white/90 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg group-hover:shadow-blue-200 transition-all duration-300">
+                      <ShoppingBag className="w-6 h-6 text-white" />
                     </div>
+                    <TrendingUp className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors duration-300" />
                   </div>
+                  <p className="text-sm font-medium text-slate-600 mb-1">
+                    Tổng đơn hàng
+                  </p>
+                  <p className="text-2xl font-bold text-slate-800">
+                    {stats.orderTotal || 0}
+                  </p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-green-100">
-                  <div className="flex items-center">
-                    <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Đã giao</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {stats.deliveredOrder || 0}
-                      </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 hover:shadow-xl hover:bg-white/90 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg group-hover:shadow-emerald-200 transition-all duration-300">
+                      <CheckCircle className="w-6 h-6 text-white" />
                     </div>
+                    <Package className="w-5 h-5 text-slate-400 group-hover:text-emerald-500 transition-colors duration-300" />
                   </div>
+                  <p className="text-sm font-medium text-slate-600 mb-1">
+                    Đã giao
+                  </p>
+                  <p className="text-2xl font-bold text-slate-800">
+                    {stats.deliveredOrder || 0}
+                  </p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-yellow-100">
-                  <div className="flex items-center">
-                    <Clock className="w-6 h-6 text-yellow-600 mr-3" />
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Chờ xác nhận</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {stats.pendingOrder || 0}
-                      </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 hover:shadow-xl hover:bg-white/90 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-lg group-hover:shadow-amber-200 transition-all duration-300">
+                      <Clock className="w-6 h-6 text-white" />
                     </div>
+                    <Calendar className="w-5 h-5 text-slate-400 group-hover:text-amber-500 transition-colors duration-300" />
                   </div>
+                  <p className="text-sm font-medium text-slate-600 mb-1">
+                    Chờ xác nhận
+                  </p>
+                  <p className="text-2xl font-bold text-slate-800">
+                    {stats.pendingOrder || 0}
+                  </p>
                 </div>
 
-                <div className="bg-white rounded-xl p-4 shadow-sm border border-purple-100">
-                  <div className="flex items-center">
-                    <DollarSign className="w-6 h-6 text-purple-600 mr-3" />
-                    <div>
-                      <p className="text-xs text-gray-600 mb-1">Doanh thu</p>
-                      <p className="text-sm font-bold text-gray-900">
-                        {Number(stats.totalRevenue || 0).toLocaleString(
-                          "vi-VN"
-                        )}
-                        đ
-                      </p>
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-6 hover:shadow-xl hover:bg-white/90 transition-all duration-300 group">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg group-hover:shadow-purple-200 transition-all duration-300">
+                      <DollarSign className="w-6 h-6 text-white" />
                     </div>
+                    <CreditCard className="w-5 h-5 text-slate-400 group-hover:text-purple-500 transition-colors duration-300" />
                   </div>
+                  <p className="text-sm font-medium text-slate-600 mb-1">
+                    Doanh thu
+                  </p>
+                  <p className="text-lg font-bold text-slate-800">
+                    {Number(stats.totalRevenue || 0).toLocaleString("vi-VN")}đ
+                  </p>
                 </div>
               </>
             )}
           </div>
         )}
 
-        {/* Compact Orders List */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b bg-gray-50">
-            <h3 className="font-semibold text-gray-900 flex items-center">
-              <ShoppingBag className="mr-2" size={18} />
-              Danh sách đơn hàng ({orders.length})
+        {/* Elegant Orders List */}
+        <div className="flex-1 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden flex flex-col">
+          <div className="px-6 py-4 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-blue-50/50">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center">
+              <Package
+                className="mr-3 p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg text-white"
+                size={32}
+              />
+              Danh sách đơn hàng
+              <span className="ml-3 px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
+                {orders.length}
+              </span>
             </h3>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="p-4 space-y-3">
+              <div className="p-6 space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="border rounded-lg p-3 animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div
+                    key={i}
+                    className="bg-white/60 rounded-xl border border-slate-200/50 p-4 animate-pulse"
+                  >
+                    <div className="h-4 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full mb-3"></div>
+                    <div className="h-3 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gradient-to-r from-slate-200 to-slate-300 rounded-full w-1/2"></div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-slate-200/30">
                 {orders.map((order) => (
-                  <div key={order.id} className="p-4 hover:bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-3">
-                        <span className="font-bold text-gray-900">
-                          #{order.id}
-                        </span>
+                  <div
+                    key={order.id}
+                    className="p-6 hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-indigo-50/30 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl border border-slate-300 shadow-sm">
+                          <span className="font-bold text-slate-800 text-lg">
+                            #{order.id}
+                          </span>
+                        </div>
                         <span
-                          className={`px-2 py-1 text-xs rounded-full border ${getStatusColor(
+                          className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-xl ${getStatusColor(
                             order.state
                           )}`}
                         >
+                          {getStatusIcon(order.state)}
                           {order.state}
                         </span>
                       </div>
@@ -303,91 +358,174 @@ export const OrderManagement = () => {
                               expandedOrder === order.id ? null : order.id
                             )
                           }
-                          className="p-1 hover:bg-gray-200 rounded"
+                          className="p-2 hover:bg-white/60 rounded-xl transition-all duration-200"
                         >
                           {expandedOrder === order.id ? (
-                            <ChevronUp size={16} />
+                            <ChevronUp size={18} className="text-slate-600" />
                           ) : (
-                            <ChevronDown size={16} />
+                            <ChevronDown size={18} className="text-slate-600" />
                           )}
                         </button>
                         <button
                           onClick={() => handleOpenEdit(order)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded"
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200"
                         >
-                          <Edit size={16} />
+                          <Edit size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(order.id)}
-                          className="p-1 text-red-600 hover:bg-red-50 rounded"
+                          className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-all duration-200"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-2">
-                      <div className="flex items-center text-gray-600">
-                        <User size={14} className="mr-1" />
-                        <span className="truncate">
+                    <div className="grid grid-cols-3 gap-6 text-sm mb-3">
+                      <div className="flex items-center text-slate-600">
+                        <div className="p-2 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg mr-3">
+                          <User size={16} className="text-blue-600" />
+                        </div>
+                        <span className="truncate font-medium">
                           {order.user?.name || order.customer}
                         </span>
                       </div>
-                      <div className="text-right font-bold text-gray-900">
-                        {Number(order.total_cost ?? 0).toLocaleString("vi-VN")}đ
+                      <div className="text-center">
+                        {order.discount ? (
+                          <div className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-xl border border-emerald-200 shadow-sm">
+                            <Tag size={14} className="mr-1" />-
+                            {(() => {
+                              const originalPrice =
+                                Number(order.total_cost) +
+                                Number(order.discount);
+                              const percentage = Math.round(
+                                (Number(order.discount) / originalPrice) * 100
+                              );
+                              return percentage;
+                            })()}
+                            %
+                          </div>
+                        ) : (
+                          <span className="text-sm text-slate-400 font-medium">
+                            Không có giảm giá
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold bg-gradient-to-r from-slate-700 to-slate-600 bg-clip-text text-transparent">
+                          {Number(
+                            order.total ?? order.total_cost ?? 0
+                          ).toLocaleString("vi-VN")}
+                          đ
+                        </span>
                       </div>
                     </div>
 
                     {expandedOrder === order.id && (
-                      <div className="mt-3 pt-3 border-t bg-gray-50 rounded-lg p-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <div className="flex items-center text-gray-600 mb-1">
-                              <User size={14} className="mr-1" />
-                              <span>{order.user?.email || order.email}</span>
+                      <div className="mt-4 pt-4 border-t border-slate-200/50">
+                        <div className="bg-gradient-to-r from-slate-50/50 to-blue-50/50 rounded-xl p-4 border border-slate-200/30">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                            <div className="space-y-3">
+                              <div className="flex items-center text-slate-600">
+                                <div className="p-1.5 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg mr-3">
+                                  <User size={14} className="text-blue-600" />
+                                </div>
+                                <span className="font-medium">
+                                  {order.user?.email || order.email}
+                                </span>
+                              </div>
+                              <div className="flex items-center text-slate-600">
+                                <div className="p-1.5 bg-gradient-to-br from-green-100 to-green-200 rounded-lg mr-3">
+                                  <Phone size={14} className="text-green-600" />
+                                </div>
+                                <span className="font-medium">
+                                  {order.phone}
+                                </span>
+                              </div>
+                              <div className="flex items-start text-slate-600">
+                                <div className="p-1.5 bg-gradient-to-br from-purple-100 to-purple-200 rounded-lg mr-3 mt-0.5">
+                                  <MapPin
+                                    size={14}
+                                    className="text-purple-600"
+                                  />
+                                </div>
+                                <span className="text-sm font-medium leading-relaxed">
+                                  {order.address}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex items-center text-gray-600 mb-1">
-                              <Phone size={14} className="mr-1" />
-                              <span>{order.phone}</span>
-                            </div>
-                            <div className="flex items-start text-gray-600 mb-2">
-                              <MapPin
-                                size={14}
-                                className="mr-1 mt-0.5 flex-shrink-0"
-                              />
-                              <span className="text-xs">{order.address}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-700 mb-1">
-                              Sản phẩm:
-                            </p>
-                            <div className="space-y-1">
-                              {order.order_items
-                                .slice(0, 2)
-                                .map((item, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="text-xs text-gray-600 bg-white rounded px-2 py-1"
-                                  >
-                                    {item.book.title} x{item.quantity}
+                            <div className="space-y-3">
+                              {order.discount && (
+                                <div className="p-3 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                                  <div className="flex items-center mb-2">
+                                    <Tag className="w-4 h-4 text-emerald-600 mr-2" />
+                                    <p className="text-sm font-bold text-emerald-700">
+                                      Giảm giá áp dụng:
+                                    </p>
                                   </div>
-                                ))}
-                              {order.order_items.length > 2 && (
-                                <div className="text-xs text-gray-500">
-                                  +{order.order_items.length - 2} sản phẩm khác
+                                  <div className="text-sm text-emerald-600 font-medium">
+                                    -
+                                    {Math.round(
+                                      (order.discount /
+                                        (Number(order.total_cost) +
+                                          Number(order.discount))) *
+                                        100
+                                    )}
+                                    % (
+                                    {Number(order.discount).toLocaleString(
+                                      "vi-VN"
+                                    )}
+                                    đ)
+                                  </div>
                                 </div>
                               )}
+                              <div>
+                                <p className="font-bold text-slate-700 mb-2 flex items-center">
+                                  <Package size={16} className="mr-2" />
+                                  Sản phẩm:
+                                </p>
+                                <div className="space-y-2">
+                                  {order.order_items
+                                    .slice(0, 2)
+                                    .map((item, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="text-sm text-slate-600 bg-white/60 rounded-lg px-3 py-2 border border-slate-200/50"
+                                      >
+                                        <span className="font-medium">
+                                          {item.book.title}
+                                        </span>
+                                        <span className="mx-2 text-blue-600 font-bold">
+                                          ×{item.quantity}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  {order.order_items.length > 2 && (
+                                    <div className="text-sm text-slate-500 font-medium bg-slate-100/50 rounded-lg px-3 py-2">
+                                      +{order.order_items.length - 2} sản phẩm
+                                      khác
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="mt-2 pt-2 border-t flex justify-between items-center text-xs text-gray-500">
-                          <span>Thanh toán: {order.payment_method}</span>
-                          <span>
-                            {new Date(order.created_at).toLocaleDateString(
-                              "vi-VN"
-                            )}
-                          </span>
+                          <div className="mt-4 pt-3 border-t border-slate-200/50 flex justify-between items-center text-sm">
+                            <div className="flex items-center text-slate-600">
+                              <CreditCard size={16} className="mr-2" />
+                              <span className="font-medium">
+                                Thanh toán: {order.payment_method}
+                              </span>
+                            </div>
+                            <div className="flex items-center text-slate-600">
+                              <Calendar size={16} className="mr-2" />
+                              <span className="font-medium">
+                                {new Date(order.created_at).toLocaleDateString(
+                                  "vi-VN"
+                                )}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -398,66 +536,110 @@ export const OrderManagement = () => {
           </div>
         </div>
 
-        {/* Compact Update Modal */}
+        {/* Elegant Update Modal */}
         {showModal && (
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center z-50 p-6"
             onClick={handleBackdropClick}
           >
             <div
-              className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl"
+              className="bg-white/95 backdrop-blur-sm rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl border border-white/50"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="text-lg font-bold text-gray-900">
-                  Cập nhật đơn hàng #{editingOrder?.id}
-                </h3>
-                <button
-                  onClick={resetForm}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
-                >
-                  <X size={20} />
-                </button>
+              <div className="p-6 border-b border-slate-200/50 bg-gradient-to-r from-slate-50/50 to-blue-50/50">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                    Cập nhật đơn hàng #{editingOrder?.id}
+                  </h3>
+                  <button
+                    onClick={resetForm}
+                    className="p-2 hover:bg-white/60 rounded-xl transition-all duration-200"
+                  >
+                    <X size={24} className="text-slate-600" />
+                  </button>
+                </div>
               </div>
 
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-6">
                 {/* Order Summary */}
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <h4 className="font-semibold text-gray-800 mb-2">
+                <div className="bg-gradient-to-r from-slate-50/50 to-blue-50/50 rounded-xl p-4 border border-slate-200/30">
+                  <h4 className="font-bold text-slate-800 mb-4 flex items-center">
+                    <Package size={20} className="mr-2" />
                     Thông tin đơn hàng
                   </h4>
-                  <div className="text-sm space-y-1">
-                    <p>
-                      <span className="font-medium">Khách hàng:</span>{" "}
-                      {editingOrder?.user?.name}
-                    </p>
-                    <p>
-                      <span className="font-medium">Email:</span>{" "}
-                      {editingOrder?.user?.email}
-                    </p>
-                    <p>
-                      <span className="font-medium">Tổng tiền:</span>
-                      <span className="font-bold text-blue-600 ml-1">
-                        {Number(editingOrder?.total_cost ?? 0).toLocaleString(
-                          "vi-VN"
-                        )}
-                        đ
-                      </span>
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-2">
+                      <p className="flex items-center">
+                        <User size={16} className="mr-2 text-blue-600" />
+                        <span className="font-medium text-slate-600">
+                          Khách hàng:
+                        </span>
+                        <span className="ml-2 font-semibold">
+                          {editingOrder?.user?.name}
+                        </span>
+                      </p>
+                      <p className="flex items-center">
+                        <span className="font-medium text-slate-600">
+                          Email:
+                        </span>
+                        <span className="ml-2 font-semibold">
+                          {editingOrder?.user?.email}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      {editingOrder?.discount && (
+                        <p className="flex items-center">
+                          <Tag size={16} className="mr-2 text-emerald-600" />
+                          <span className="font-medium text-slate-600">
+                            Giảm giá:
+                          </span>
+                          <span className="ml-2 text-emerald-600 font-bold">
+                            -
+                            {Math.round(
+                              (editingOrder.discount /
+                                (Number(editingOrder.total_cost) +
+                                  Number(editingOrder.discount))) *
+                                100
+                            )}
+                            % (
+                            {Number(editingOrder.discount).toLocaleString(
+                              "vi-VN"
+                            )}
+                            đ)
+                          </span>
+                        </p>
+                      )}
+                      <p className="flex items-center">
+                        <DollarSign
+                          size={16}
+                          className="mr-2 text-purple-600"
+                        />
+                        <span className="font-medium text-slate-600">
+                          Tổng tiền:
+                        </span>
+                        <span className="ml-2 font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          {Number(
+                            editingOrder?.total ?? editingOrder?.total_cost ?? 0
+                          ).toLocaleString("vi-VN")}
+                          đ
+                        </span>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 {/* Form */}
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Trạng thái
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Trạng thái đơn hàng
                     </label>
                     <select
                       name="state"
                       value={formData.state}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium"
                     >
                       <option value="Chờ xác nhận">Chờ xác nhận</option>
                       <option value="Đang vận chuyển">Đang vận chuyển</option>
@@ -467,7 +649,7 @@ export const OrderManagement = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                       Số điện thoại
                     </label>
                     <input
@@ -475,37 +657,37 @@ export const OrderManagement = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium"
                       placeholder="Nhập số điện thoại"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                       Địa chỉ giao hàng
                     </label>
                     <textarea
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      placeholder="Nhập địa chỉ giao hàng"
+                      rows={4}
+                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium resize-none"
+                      placeholder="Nhập địa chỉ giao hàng chi tiết"
                     />
                   </div>
 
-                  <div className="flex space-x-3 pt-2">
+                  <div className="flex space-x-4 pt-4">
                     <button
                       onClick={handleUpdate}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-6 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
-                      Cập nhật
+                      Cập nhật đơn hàng
                     </button>
                     <button
                       onClick={resetForm}
-                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors"
+                      className="flex-1 bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 py-3 px-6 rounded-xl font-bold transition-all duration-300 shadow-md hover:shadow-lg"
                     >
-                      Hủy
+                      Hủy bỏ
                     </button>
                   </div>
                 </div>
