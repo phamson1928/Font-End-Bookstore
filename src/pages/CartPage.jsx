@@ -4,6 +4,7 @@ import { useCart } from "../contexts/CartContext";
 import { Header } from "../components/user/Header";
 import { getImageUrl } from "../utils/imageUtils";
 import { api } from "../api";
+import { toast } from "react-toastify";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } =
@@ -126,11 +127,13 @@ const CartPage = () => {
   const handleCheckout = async () => {
     if (paymentMethod === "cod") {
       if (!isValidPhone(phone)) {
-        alert("Vui lòng nhập số điện thoại hợp lệ (10 số, bắt đầu bằng 0).");
+        toast.info(
+          "Vui lòng nhập số điện thoại hợp lệ (10 số, bắt đầu bằng 0)."
+        );
         return;
       }
       if (!address?.trim()) {
-        alert("Vui lòng nhập địa chỉ giao hàng.");
+        toast.info("Vui lòng nhập địa chỉ giao hàng.");
         return;
       }
       try {
@@ -142,22 +145,22 @@ const CartPage = () => {
         const order = res?.data?.order;
         const message = res?.data?.message ?? "Đặt hàng thành công!";
         clearCart();
-        alert(order?.id ? `${message} Mã đơn: ${order.id}` : message);
+        toast.success(order?.id ? `${message} Mã đơn: ${order.id}` : message);
       } catch (err) {
         console.error("Tạo đơn hàng thất bại:", err);
         const apiMsg = err?.response?.data?.error || err?.message;
-        alert(
+        toast.error(
           apiMsg
             ? `Lỗi khi đặt hàng: ${apiMsg}`
             : "Lỗi khi đặt hàng. Vui lòng thử lại."
         );
       }
     } else if (paymentMethod === "card") {
-      alert(
+      toast.info(
         "Bạn đã chọn thanh toán bằng thẻ. Tính năng cổng thanh toán sẽ được tích hợp sau."
       );
     } else {
-      alert("Vui lòng chọn phương thức thanh toán.");
+      toast.info("Vui lòng chọn phương thức thanh toán.");
     }
   };
 
