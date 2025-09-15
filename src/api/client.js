@@ -17,15 +17,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
-      
-      // Add CSRF token for non-GET requests
-      const method = config.method?.toLowerCase();
-      if (method && method !== 'get') {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        if (csrfToken) {
-          config.headers['X-CSRF-TOKEN'] = csrfToken;
-        }
-      }
     }
 
     // Ensure correct Content-Type handling
