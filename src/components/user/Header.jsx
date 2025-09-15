@@ -11,7 +11,6 @@ export const Header = ({
   isLoggedIn = false,
   username = "",
   handleLogout = () => {
-    // Safe default logout behavior when not provided by parent
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("username");
@@ -26,17 +25,14 @@ export const Header = ({
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    // Simulate loading state for auth check
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 500);
 
-    // Handle scroll effect
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
-    // Close dropdown when clicking outside
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
@@ -58,7 +54,6 @@ export const Header = ({
   };
   const { getTotalItems } = useCart();
 
-  // Derive auth state from localStorage when parent does not pass values
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const storedUsername =
@@ -192,81 +187,47 @@ export const Header = ({
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             {isLoggedInEffective && <NotificationBell />}
             {isLoggedInEffective ? (
-              <div className="flex items-center space-x-4">
-                {/* User Dropdown */}
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100 
-                             hover:from-slate-100 hover:to-slate-200 rounded-xl border border-slate-200 
-                             transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
-                    onClick={toggleDropdown}
+              <>
+                {/* Cart */}
+                <Link
+                  to="/cart"
+                  className="group relative p-3 text-slate-700 hover:text-blue-600 bg-gradient-to-r from-slate-50 to-slate-100 
+                             hover:from-blue-50 hover:to-purple-50 rounded-xl transition-all duration-300 
+                             shadow-md hover:shadow-lg transform hover:scale-105"
+                >
+                  <svg
+                    className="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <div
-                      className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full 
-                                  flex items-center justify-center text-white font-bold text-sm"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5M17 18a2 2 0 11-4 0 2 2 0 014 0zM9 18a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                  {getTotalItems() > 0 && (
+                    <span
+                      className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white 
+                                 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold
+                                 shadow-lg animate-pulse"
                     >
-                      {usernameEffective.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-slate-700 font-medium">
-                      {usernameEffective}
+                      {getTotalItems()}
                     </span>
-                    <svg
-                      className={`w-4 h-4 text-slate-500 transition-transform duration-200 
-                                   ${showDropdown ? "rotate-180" : ""}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {showDropdown && (
-                    <div
-                      className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-md rounded-2xl 
-                                  shadow-2xl border border-white/50 py-2 z-50 transform transition-all duration-200 
-                                  animate-in slide-in-from-top-2"
-                    >
-                      <Link
-                        to="/history-order"
-                        className="flex items-center px-4 py-3 text-slate-700 hover:bg-gradient-to-r 
-                                 hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 transition-all duration-200
-                                 font-medium"
-                        onClick={() => setShowDropdown(false)}
-                      >
-                        <svg
-                          className="w-5 h-5 mr-3"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        Lịch sử đơn hàng
-                      </Link>
-                    </div>
                   )}
-                </div>
+                </Link>
 
                 {/* Authors Button */}
                 <Link
                   to="/authors"
                   className="group bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 
-                           text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 
-                           shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                             text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 
+                             shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
                 >
                   <svg
                     className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110"
@@ -285,12 +246,12 @@ export const Header = ({
                 </Link>
 
                 {/* Admin Button */}
-                {String(roleEffective || "").toLowerCase() === "admin" && (
+                {roleEffective === "admin" && (
                   <Link
                     to="/admin"
-                    className="group bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 
-                             text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 
-                             shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
+                    className="group bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 
+                               text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 
+                               shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
                   >
                     <svg
                       className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110"
@@ -314,81 +275,120 @@ export const Header = ({
                     Admin
                   </Link>
                 )}
-
-                {/* Logout Button */}
-                <button
-                  onClick={handleLogout}
-                  className="group bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 
-                           text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 
-                           shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:scale-110"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {/* User Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-slate-50 to-slate-100 
+                               hover:from-slate-100 hover:to-slate-200 rounded-xl border border-slate-200 
+                               transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                    onClick={toggleDropdown}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Đăng xuất
-                </button>
-              </div>
+                    <div
+                      className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full 
+                                    flex items-center justify-center text-white font-bold text-sm"
+                    >
+                      {usernameEffective.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-slate-700 font-medium">
+                      {usernameEffective}
+                    </span>
+                    <svg
+                      className={`w-4 h-4 text-slate-500 transition-transform duration-200 
+                                     ${showDropdown ? "rotate-180" : ""}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {showDropdown && (
+                    <div
+                      className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-md rounded-2xl 
+                                    shadow-2xl border border-white/50 py-2 z-50 transform transition-all duration-200 
+                                    animate-in slide-in-from-top-2"
+                    >
+                      <Link
+                        to="/history-order"
+                        className="flex items-center px-4 py-3 text-slate-700 hover:bg-gradient-to-r 
+                                   hover:from-blue-50 hover:to-purple-50 hover:text-blue-700 transition-all duration-200
+                                   font-medium"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <svg
+                          className="w-5 h-5 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        Lịch sử đơn hàng
+                      </Link>
+
+                      {/* Divider */}
+                      <div className="border-t border-slate-100 my-1"></div>
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleLogout();
+                        }}
+                        className="w-full flex items-center px-4 py-3 text-red-600 hover:bg-gradient-to-r 
+                                   hover:from-red-50 hover:to-pink-50 hover:text-red-700 transition-all duration-200
+                                   font-medium"
+                      >
+                        <svg
+                          className="w-5 h-5 mr-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <>
                 <button
                   onClick={showLoginModal}
                   className="group bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 
-                           text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 
-                           shadow-lg hover:shadow-xl transform hover:scale-105"
+                             text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 
+                             shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Đăng nhập
                 </button>
                 <button
                   onClick={showRegisterModal}
                   className="group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 
-                           text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 
-                           shadow-lg hover:shadow-xl transform hover:scale-105"
+                             text-white px-6 py-2.5 rounded-xl font-semibold transition-all duration-300 
+                             shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Đăng ký
                 </button>
               </>
             )}
-
-            {/* Cart */}
-            <Link
-              to="/cart"
-              className="group relative p-3 text-slate-700 hover:text-blue-600 bg-gradient-to-r from-slate-50 to-slate-100 
-                       hover:from-blue-50 hover:to-purple-50 rounded-xl transition-all duration-300 
-                       shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-              <svg
-                className="w-6 h-6 transition-transform duration-300 group-hover:scale-110"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5M17 18a2 2 0 11-4 0 2 2 0 014 0zM9 18a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-              {getTotalItems() > 0 && (
-                <span
-                  className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white 
-                               rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold
-                               shadow-lg animate-pulse"
-                >
-                  {getTotalItems()}
-                </span>
-              )}
-            </Link>
           </div>
         </div>
 
