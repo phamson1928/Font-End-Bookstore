@@ -18,7 +18,7 @@ const NotificationManagement = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await api.get("/notifications");
+      const response = await api.get("/notifications/admin");
       setNotifications(response.data);
       setLoading(false);
     } catch (error) {
@@ -50,7 +50,7 @@ const NotificationManagement = () => {
     if (!validateForm()) return;
 
     try {
-      await api.post("/notifications", newNotification);
+      await api.post("/notifications/admin", newNotification);
       toast.success("Đã gửi thông báo thành công");
       setShowModal(false);
       setNewNotification({ message: "" });
@@ -64,7 +64,7 @@ const NotificationManagement = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa thông báo này?")) {
       try {
-        await api.delete(`/notifications/${id}`);
+        await api.delete(`/notifications/admin/${id}`);
         toast.success("Đã xóa thông báo");
         fetchNotifications();
       } catch (error) {
