@@ -77,7 +77,9 @@ const HomePage = () => {
     const emailInput = e.target.email?.value?.trim();
 
     if (!nameInput || !passwordInput || !confirmPasswordInput || !emailInput) {
-      toast.error("Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu");
+      toast.error(
+        "Vui lòng nhập đầy đủ họ tên, email, name, mật khẩu và xác nhận mật khẩu"
+      );
       return;
     }
 
@@ -126,7 +128,9 @@ const HomePage = () => {
     }
     try {
       const { data } = await api.post("/forgot-password", { email });
-      toast.info(data?.message || "Đã gửi email đặt lại mật khẩu (nếu email tồn tại)");
+      toast.info(
+        data?.message || "Đã gửi email đặt lại mật khẩu (nếu email tồn tại)"
+      );
       setResetEmail(email);
       setShowForgotPasswordModal(false);
       setShowResetPasswordModal(true);
@@ -147,7 +151,9 @@ const HomePage = () => {
     const password = e.target.password?.value;
     const password_confirmation = e.target.password_confirmation?.value;
     if (!email || !token || !password || !password_confirmation) {
-      toast.error("Vui lòng nhập đầy đủ email, token, mật khẩu và xác nhận mật khẩu");
+      toast.error(
+        "Vui lòng nhập đầy đủ email, token, mật khẩu và xác nhận mật khẩu"
+      );
       return;
     }
     if (password !== password_confirmation) {
@@ -161,7 +167,9 @@ const HomePage = () => {
         password,
         password_confirmation,
       });
-      toast.success(data?.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.");
+      toast.success(
+        data?.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập."
+      );
       setShowResetPasswordModal(false);
       setShowLoginModal(true);
     } catch (err) {

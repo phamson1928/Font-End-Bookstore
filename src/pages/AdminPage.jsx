@@ -9,6 +9,7 @@ import { AuthorManagement } from "../components/admin/AuthorManagement";
 import { CategoryManagement } from "../components/admin/CategoryManagement";
 import OrderChangeRequestManagement from "../components/admin/OrderChangeRequestManagement";
 import NotificationManagement from "../components/admin/NotificationManagement";
+import DiscountManagement from "../components/admin/DiscountManagement";
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -32,6 +33,8 @@ const AdminPage = () => {
         return <NotificationManagement />;
       case "order-change-requests":
         return <OrderChangeRequestManagement />;
+      case "discounts":
+        return <DiscountManagement />;
       default:
         return <Dashboard />;
     }
@@ -57,7 +60,9 @@ const AdminPage = () => {
             isSidebarOpen ? "ml-64" : "ml-20"
           }`}
         >
-          <div className="p-6 transition-all duration-300">{renderContent()}</div>
+          <div className="p-6 transition-all duration-300">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>
