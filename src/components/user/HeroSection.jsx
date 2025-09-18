@@ -5,7 +5,7 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import { useState, useEffect } from "react";
 
-export const HeroSection = () => {
+export const HeroSection = ({ onExploreClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -140,10 +140,11 @@ export const HeroSection = () => {
                            }`}
             >
               <button
+                onClick={onExploreClick}
                 className={`group/btn relative bg-gradient-to-r ${slides[currentSlide]?.accent} 
                                 text-white hover:shadow-2xl px-8 py-4 md:py-5 rounded-2xl font-bold 
                                 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1
-                                text-base md:text-lg overflow-hidden`}
+                                text-base md:text-lg overflow-hidden cursor-pointer`}
               >
                 <span className="relative z-10 flex items-center">
                   <svg
