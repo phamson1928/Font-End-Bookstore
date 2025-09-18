@@ -443,7 +443,6 @@ export const BookManagement = () => {
                 categories={categories}
                 handleAddBook={handleAddBook}
                 handleEditBook={handleEditBook}
-                loading={loading}
                 onCancel={() => {
                   setShowAddForm(false);
                   setEditingBook(null);

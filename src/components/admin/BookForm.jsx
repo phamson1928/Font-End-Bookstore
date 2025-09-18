@@ -1,4 +1,105 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+// Move FormField outside of BookForm component to prevent re-creation on each render
+const FormField = ({
+  label,
+  name,
+  type = "text",
+  required = false,
+  options = null,
+  formData,
+  handleChange,
+  handleImageChange,
+  errors,
+  ...props
+}) => (
+  <div>
+    <label className="block text-sm font-semibold text-slate-700 mb-2">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {type === "select" ? (
+      <select
+        name={name}
+        value={formData[name] || ""}
+        onChange={handleChange}
+        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
+                 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                 text-slate-700 font-medium shadow-sm hover:shadow-md ${
+                   errors[name] ? "border-red-500" : "border-slate-200"
+                 }`}
+        required={required}
+        {...props}
+      >
+        {options}
+      </select>
+    ) : type === "textarea" ? (
+      <textarea
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
+                 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                 placeholder-slate-400 text-slate-700 font-medium resize-none shadow-sm hover:shadow-md ${
+                   errors[name] ? "border-red-500" : "border-slate-200"
+                 }`}
+        required={required}
+        {...props}
+      />
+    ) : type === "file" ? (
+      <input
+        type="file"
+        name={name}
+        accept="image/*"
+        onChange={handleImageChange}
+        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 
+                 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                 text-slate-700 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 
+                 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
+                 shadow-sm hover:shadow-md"
+        {...props}
+      />
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
+                 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
+                 placeholder-slate-400 text-slate-700 font-medium shadow-sm hover:shadow-md ${
+                   errors[name] ? "border-red-500" : "border-slate-200"
+                 }`}
+        required={required}
+        {...props}
+      />
+    )}
+    {errors[name] && (
+      <p className="text-red-500 text-sm mt-2 flex items-center">
+        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fillRule="evenodd"
+            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+            clipRule="evenodd"
+          />
+        </svg>
+        {errors[name]}
+      </p>
+    )}
+  </div>
+);
+
+// Move FormSection outside as well
+const FormSection = ({ title, children, icon }) => (
+  <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300">
+    <div className="flex items-center mb-4">
+      <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl mr-3">
+        {icon}
+      </div>
+      <h4 className="font-bold text-slate-800 text-lg">{title}</h4>
+    </div>
+    <div className="space-y-4">{children}</div>
+  </div>
+);
 
 export const BookForm = ({
   book,
@@ -6,7 +107,6 @@ export const BookForm = ({
   handleEditBook,
   onCancel,
   categories,
-  loading = true,
 }) => {
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -49,7 +149,6 @@ export const BookForm = ({
 
   useEffect(() => {
     if (book) {
-      // Map to flat form shape; avoid nested objects and keep image empty unless a new file is chosen
       setFormData({
         title: book.title || "",
         author: book.author || "",
@@ -71,41 +170,23 @@ export const BookForm = ({
     }
   }, [book]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-
-    // Xử lý đặc biệt cho các trường số
-    let processedValue = value;
-    if (
-      name === "price" ||
-      name === "discount_price" ||
-      name === "number_of_pages"
-    ) {
-      // Chỉ cho phép số và không âm
-      if (value === "" || (/^\d+$/.test(value) && parseInt(value) >= 0)) {
-        processedValue = value;
-      } else {
-        return; // Không cập nhật nếu giá trị không hợp lệ
-      }
-    }
-
     setFormData((prev) => ({
       ...prev,
-      [name]: processedValue,
+      [name]: value,
     }));
-  };
+  }, []);
 
-  const handleImageChange = (e) => {
+  const handleImageChange = useCallback((e) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith("image/")) {
         alert("Vui lòng chọn file hình ảnh hợp lệ");
         e.target.value = "";
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert("File hình ảnh không được lớn hơn 5MB");
         e.target.value = "";
@@ -117,19 +198,40 @@ export const BookForm = ({
         image: file,
       }));
     }
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Validate required fields
       const newErrors = {};
       if (!formData.title) newErrors.title = "Tên sách là bắt buộc";
       if (!formData.author) newErrors.author = "Tác giả là bắt buộc";
       if (!formData.price) newErrors.price = "Giá là bắt buộc";
       if (!formData.category_id) newErrors.category_id = "Danh mục là bắt buộc";
       if (!formData.language) newErrors.language = "Ngôn ngữ là bắt buộc";
+
+      // Validate number fields
+      if (
+        formData.price &&
+        (!/^\d+$/.test(formData.price) || parseInt(formData.price) < 0)
+      ) {
+        newErrors.price = "Giá phải là số dương";
+      }
+      if (
+        formData.discount_price &&
+        (!/^\d+$/.test(formData.discount_price) ||
+          parseInt(formData.discount_price) < 0)
+      ) {
+        newErrors.discount_price = "Giá giảm phải là số dương";
+      }
+      if (
+        formData.number_of_pages &&
+        (!/^\d+$/.test(formData.number_of_pages) ||
+          parseInt(formData.number_of_pages) < 0)
+      ) {
+        newErrors.number_of_pages = "Số trang phải là số dương";
+      }
 
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
@@ -138,10 +240,8 @@ export const BookForm = ({
 
       setErrors({});
 
-      // Tạo FormData để xử lý file upload
       const submitData = new FormData();
 
-      // Chỉ append các field hợp lệ, bỏ qua nested objects hoặc metadata từ server
       const allowedKeys = [
         "title",
         "author",
@@ -164,35 +264,35 @@ export const BookForm = ({
         if (value === "" || value === null || value === undefined) return;
 
         if (key === "image") {
-          // Chỉ gửi image nếu là File mới
           if (value instanceof File) submitData.append("image", value);
           return;
         }
 
-        if (
+        if (key === "category_id") {
+          submitData.append(key, Number(value));
+        } else if (
           key === "price" ||
           key === "discount_price" ||
-          key === "number_of_pages" ||
-          key === "category_id"
+          key === "number_of_pages"
         ) {
-          submitData.append(key, Number(value));
+          // Chỉ append nếu là số hợp lệ
+          if (/^\d+$/.test(value)) {
+            submitData.append(key, Number(value));
+          }
         } else {
           submitData.append(key, value);
         }
       });
 
-      // Log FormData để debug
       console.log("Submitting FormData:");
       for (let [key, value] of submitData.entries()) {
         console.log(key, value);
       }
 
-      // Gọi function tương ứng
       if (book) {
         await handleEditBook(submitData, e);
       } else {
         await handleAddBook(submitData, e);
-        // Reset form sau khi thêm thành công
         resetForm();
       }
     } catch (error) {
@@ -201,100 +301,7 @@ export const BookForm = ({
     }
   };
 
-  const FormSection = ({ title, children, icon }) => (
-    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300">
-      <div className="flex items-center mb-4">
-        <div className="p-2 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl mr-3">
-          {icon}
-        </div>
-        <h4 className="font-bold text-slate-800 text-lg">{title}</h4>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </div>
-  );
 
-  const FormField = ({
-    label,
-    name,
-    type = "text",
-    required = false,
-    options = null,
-    ...props
-  }) => (
-    <div>
-      <label className="block text-sm font-semibold text-slate-700 mb-2">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {type === "select" ? (
-        <select
-          name={name}
-          value={formData[name] || ""}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
-                   focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
-                   text-slate-700 font-medium shadow-sm hover:shadow-md ${
-                     errors[name] ? "border-red-500" : "border-slate-200"
-                   }`}
-          required={required}
-          {...props}
-        >
-          {options}
-        </select>
-      ) : type === "textarea" ? (
-        <textarea
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
-                   focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
-                   placeholder-slate-400 text-slate-700 font-medium resize-none shadow-sm hover:shadow-md ${
-                     errors[name] ? "border-red-500" : "border-slate-200"
-                   }`}
-          required={required}
-          {...props}
-        />
-      ) : type === "file" ? (
-        <input
-          type="file"
-          name={name}
-          accept="image/*"
-          onChange={handleImageChange}
-          className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 
-                   focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
-                   text-slate-700 font-medium file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 
-                   file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                   shadow-sm hover:shadow-md"
-          {...props}
-        />
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-4 focus:ring-blue-100 
-                   focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm
-                   placeholder-slate-400 text-slate-700 font-medium shadow-sm hover:shadow-md ${
-                     errors[name] ? "border-red-500" : "border-slate-200"
-                   }`}
-          required={required}
-          {...props}
-        />
-      )}
-      {errors[name] && (
-        <p className="text-red-500 text-sm mt-2 flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
 
   return (
     <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6">
@@ -324,12 +331,20 @@ export const BookForm = ({
               name="title"
               required
               placeholder="Nhập tên sách"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Tác giả"
               name="author"
               required
               placeholder="Nhập tên tác giả"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Mô tả"
@@ -337,12 +352,20 @@ export const BookForm = ({
               type="textarea"
               rows={3}
               placeholder="Nhập mô tả sách"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Danh mục"
               name="category_id"
               type="select"
               required
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
               options={
                 <>
                   <option value="">Chọn danh mục</option>
@@ -382,6 +405,10 @@ export const BookForm = ({
               required
               min="0"
               placeholder="Nhập giá sách"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Giá khuyến mãi (VNĐ)"
@@ -389,11 +416,19 @@ export const BookForm = ({
               type="number"
               min="0"
               placeholder="Nhập giá khuyến mãi"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Trạng thái"
               name="state"
               type="select"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
               options={
                 <>
                   <option value="Còn hàng">Còn hàng</option>
@@ -406,6 +441,10 @@ export const BookForm = ({
               label="Loại bìa"
               name="form"
               type="select"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
               options={
                 <>
                   <option value="Sách bìa mềm">Sách bìa mềm</option>
@@ -441,12 +480,20 @@ export const BookForm = ({
               label="Ngày xuất bản"
               name="publication_date"
               type="date"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Ngôn ngữ"
               name="language"
               type="select"
               required
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
               options={
                 <>
                   <option value="Tiếng Việt">Tiếng Việt</option>
@@ -461,6 +508,10 @@ export const BookForm = ({
               name="number_of_pages"
               type="number"
               placeholder="Nhập số trang"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
           </FormSection>
 
@@ -487,13 +538,29 @@ export const BookForm = ({
               label="Trọng lượng"
               name="weight_in_grams"
               placeholder="VD: 350g"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
             <FormField
               label="Kích thước"
               name="packaging_size_cm"
               placeholder="VD: 20.5 x 14.5 x 1.5 cm"
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
             />
-            <FormField label="Hình ảnh (tải từ máy)" name="image" type="file" />
+            <FormField 
+              label="Hình ảnh (tải từ máy)" 
+              name="image" 
+              type="file" 
+              formData={formData}
+              handleChange={handleChange}
+              handleImageChange={handleImageChange}
+              errors={errors}
+            />
           </FormSection>
         </div>
 
@@ -510,35 +577,12 @@ export const BookForm = ({
           <button
             type="submit"
             onClick={handleSubmit}
-            disabled={loading}
             className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 
                      text-white rounded-xl transition-all duration-300 transform hover:scale-105 
-                     shadow-lg hover:shadow-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed 
-                     disabled:transform-none flex items-center space-x-2"
+                     shadow-lg hover:shadow-xl font-semibold flex items-center space-x-2"
           >
-            {loading && (
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            )}
             <span>
-              {loading ? "Đang xử lý..." : book ? "Cập nhật" : "Thêm sách"}
+              {book ? "Cập nhật" : "Thêm sách"}
             </span>
           </button>
         </div>
