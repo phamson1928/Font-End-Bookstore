@@ -4,6 +4,7 @@ import { HeroSection } from "../components/user/HeroSection";
 import { BookDetailModal } from "../components/user/BookDetailModal";
 import { BookSection } from "../components/user/BookSection";
 import { Footer } from "../components/user/Footer";
+import DiscountBanner from "../components/user/DiscountBanner";
 import { LoginModal } from "../components/user/LoginModal";
 import { RegisterModal } from "../components/user/RegisterModal";
 import { ForgotPasswordModal } from "../components/user/ForgotPasswordModal";
@@ -24,6 +25,7 @@ const HomePage = () => {
   const [username, setUsername] = useState("");
   const [role, setRole] = useState("user");
   const [books, setBooks] = useState([]);
+  const [storeDiscount, setStoreDiscount] = useState(0);
 
   const filteredBooks = books.filter(
     (book) =>
@@ -193,6 +195,30 @@ const HomePage = () => {
 
   const [categories, setCategories] = useState([]);
 
+  // Custom smooth scroll function
+  const smoothScrollTo = (targetPosition, duration = 1000) => {
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    let startTime = null;
+
+    const animation = (currentTime) => {
+      if (startTime === null) startTime = currentTime;
+      const timeElapsed = currentTime - startTime;
+      const run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
+      window.scrollTo(0, run);
+      if (timeElapsed < duration) requestAnimationFrame(animation);
+    };
+
+    const easeInOutQuad = (t, b, c, d) => {
+      t /= d / 2;
+      if (t < 1) return (c / 2) * t * t + b;
+      t--;
+      return (-c / 2) * (t * (t - 2) - 1) + b;
+    };
+
+    requestAnimationFrame(animation);
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     setIsLoggedIn(!!storedToken);
@@ -208,11 +234,16 @@ const HomePage = () => {
         const requests = [
           api.get("/books"),
           api.get("/categories"),
+          api.get("/discounts/active"),
           token ? api.get("/user") : Promise.resolve(null),
         ];
-        const [booksRes, categoriesRes, userRes] = await Promise.all(requests);
+        const [booksRes, categoriesRes, discountRes, userRes] =
+          await Promise.all(requests);
         if (booksRes) setBooks(booksRes.data);
         if (categoriesRes) setCategories(categoriesRes.data);
+        if (discountRes?.data?.discount_percent) {
+          setStoreDiscount(discountRes.data.discount_percent);
+        }
         if (userRes) {
           setIsLoggedIn(true);
           const nextRole = userRes.data?.user?.role || "user";
@@ -252,20 +283,48 @@ const HomePage = () => {
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <HeroSection />
-        {categories.map((category) => (
-          <BookSection
-            key={category.id ?? category._id ?? category.slug}
-            id={category.id ?? category._id}
-            title={category.name}
-            books={filteredBooks.filter(
-              (book) =>
-                book.category_id === category.id ||
-                book.category === category.slug ||
-                book.category === category._id
-            )}
-            handleBookClick={handleBookClick}
+        <HeroSection
+          onExploreClick={() => {
+            const discountBanner = document.querySelector(
+              "[data-discount-banner]"
+            );
+            if (discountBanner) {
+              const targetPosition = discountBanner.offsetTop - 50;
+              smoothScrollTo(targetPosition, 800);
+            }
+          }}
+        />
+
+        {/* Store Discount Banner */}
+        <div data-discount-banner>
+          <DiscountBanner
+            discount={storeDiscount}
+            onShopNowClick={() => {
+              const bookSection = document.querySelector("[data-book-section]");
+              if (bookSection) {
+                const targetPosition = bookSection.offsetTop - 100;
+                smoothScrollTo(targetPosition, 800);
+              }
+            }}
           />
+        </div>
+        {categories.map((category, index) => (
+          <div
+            key={category.id ?? category._id ?? category.slug}
+            {...(index === 0 ? { "data-book-section": true } : {})}
+          >
+            <BookSection
+              id={category.id ?? category._id}
+              title={category.name}
+              books={filteredBooks.filter(
+                (book) =>
+                  book.category_id === category.id ||
+                  book.category === category.slug ||
+                  book.category === category._id
+              )}
+              handleBookClick={handleBookClick}
+            />
+          </div>
         ))}
       </main>
 
