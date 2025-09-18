@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/client";
 import dayjs from "dayjs";
+import Swal from 'sweetalert2';
 import {
   Users,
   UserCheck,
@@ -17,8 +18,6 @@ import {
 
 export const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -60,33 +59,43 @@ export const UserManagement = () => {
     fetchUsers();
   }, []);
 
-  const handleConfirmDelete = async () => {
-    if (!userToDelete?.id) {
-      console.warn("No user selected for deletion");
-      return;
-    }
+  const handleDeleteClick = async (user) => {
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      html: `Bạn có chắc chắn muốn xóa người dùng<br><strong>${user.name}</strong>?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
-      const response = await api.delete(`/user-delete/${userToDelete.id}`);
-      console.log(response?.data?.message || "User deleted");
-      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
-      setShowDeleteModal(false);
-      setUserToDelete(null);
+      const response = await api.delete(`/user-delete/${user.id}`);
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Người dùng đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (err) {
       console.error(
         "Error deleting user:",
         err?.response?.data || err?.message || err
       );
+      Swal.fire({
+        title: 'Lỗi!',
+        text: 'Có lỗi xảy ra khi xóa người dùng.',
+        icon: 'error'
+      });
     }
-  };
-
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setShowDeleteModal(true);
-  };
-
-  const handleCancelDelete = () => {
-    setShowDeleteModal(false);
-    setUserToDelete(null);
   };
 
   const getRoleColor = (role) => {
@@ -335,54 +344,7 @@ export const UserManagement = () => {
         </div>
       </div>
 
-      {/* Compact Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-md bg-black/40 p-4">
-          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-white/50">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center">
-                <Trash2 className="mr-2 text-red-600" size={20} />
-                Xóa người dùng
-              </h3>
-              <button
-                onClick={handleCancelDelete}
-                className="p-1 hover:bg-slate-100 rounded-lg transition-all duration-200"
-              >
-                <X size={16} className="text-slate-500" />
-              </button>
-            </div>
 
-            <div className="mb-6">
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-3">
-                <p className="text-sm text-slate-700">
-                  Bạn có chắc chắn muốn xóa
-                </p>
-                <p className="font-bold text-red-800 text-sm">
-                  {userToDelete?.name}?
-                </p>
-              </div>
-              <p className="text-xs text-slate-600">
-                Hành động này không thể hoàn tác.
-              </p>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 font-medium text-sm transition-all duration-200"
-                onClick={handleCancelDelete}
-              >
-                Hủy
-              </button>
-              <button
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 font-medium text-sm shadow-lg transition-all duration-200 hover:scale-105"
-                onClick={handleConfirmDelete}
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

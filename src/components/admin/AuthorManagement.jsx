@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { api } from "../../api";
 import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
 import dayjs from "dayjs";
+import Swal from 'sweetalert2';
 
 export const AuthorManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -32,13 +33,21 @@ export const AuthorManagement = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        alert("Vui lòng chọn file hình ảnh hợp lệ");
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Vui lòng chọn file hình ảnh hợp lệ.',
+          icon: 'error'
+        });
         e.target.value = "";
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        alert("File hình ảnh không được lớn hơn 5MB");
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'File hình ảnh không được lớn hơn 5MB.',
+          icon: 'error'
+        });
         e.target.value = "";
         return;
       }
@@ -101,11 +110,23 @@ export const AuthorManagement = () => {
       console.error("Error submitting author:", error);
       if (error.response?.data?.errors) {
         const errorMessages = Object.values(error.response.data.errors).flat();
-        alert(`Lỗi xác thực: ${errorMessages.join(", ")}`);
+        Swal.fire({
+          title: 'Lỗi xác thực!',
+          text: errorMessages.join(", "),
+          icon: 'error'
+        });
       } else if (error.response?.data?.message) {
-        alert(`Lỗi: ${error.response.data.message}`);
+        Swal.fire({
+          title: 'Lỗi!',
+          text: error.response.data.message,
+          icon: 'error'
+        });
       } else {
-        alert("Có lỗi xảy ra khi gửi form. Vui lòng thử lại.");
+        Swal.fire({
+          title: 'Lỗi!',
+          text: 'Có lỗi xảy ra khi gửi form. Vui lòng thử lại.',
+          icon: 'error'
+        });
       }
     }
   };
@@ -127,9 +148,39 @@ export const AuthorManagement = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa tác giả này?")) {
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa tác giả này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await api.delete(`/authors/${id}`);
       setAuthors((prev) => prev.filter((author) => author.id !== id));
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Tác giả đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error deleting author:', error);
+      Swal.fire({
+        title: 'Lỗi!',
+        text: 'Có lỗi xảy ra khi xóa tác giả.',
+        icon: 'error'
+      });
     }
   };
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../../api/client";
+import Swal from 'sweetalert2';
 
 export const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -97,19 +98,41 @@ export const CategoryManagement = () => {
   };
 
   const handleDelete = async (categoryId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa danh mục này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await api.delete(`/categories/${categoryId}`);
-      alert("Xóa danh mục thành công");
       await fetchCategories();
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Danh mục đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (err) {
       console.error(
         "Failed to delete category:",
         err?.response?.data || err?.message || err
       );
+      Swal.fire({
+        title: 'Lỗi!',
+        text: 'Có lỗi xảy ra khi xóa danh mục.',
+        icon: 'error'
+      });
     }
   };
 

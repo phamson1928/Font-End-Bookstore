@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import api from "../../api/client";
+import Swal from 'sweetalert2';
 import {
   Trash2,
   Trash,
@@ -72,37 +73,75 @@ const OrderChangeRequestManagement = () => {
   };
 
   const handleDelete = async (requestId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa yêu cầu này?")) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa yêu cầu này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await api.delete(`order-change-requests/${requestId}`);
-      toast.success("Đã xóa yêu cầu thành công");
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Yêu cầu đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error("Error deleting request:", error);
-      toast.error("Có lỗi xảy ra khi xóa yêu cầu");
+      Swal.fire({
+        title: 'Lỗi!',
+        text: 'Có lỗi xảy ra khi xóa yêu cầu.',
+        icon: 'error'
+      });
     }
   };
 
   const handleDeleteAll = async () => {
-    if (
-      !window.confirm(
-        "Bạn có chắc chắn muốn xóa tất cả yêu cầu? Hành động này không thể hoàn tác."
-      )
-    ) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa tất cả',
+      text: 'Bạn có chắc chắn muốn xóa tất cả yêu cầu? Hành động này không thể hoàn tác.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa tất cả',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       setIsDeleting(true);
       await api.delete("order-change-requests/delete-all");
-      toast.success("Đã xóa tất cả yêu cầu thành công");
       fetchOrderChangeRequests();
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Tất cả yêu cầu đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error("Error deleting all requests:", error);
-      toast.error("Có lỗi xảy ra khi xóa yêu cầu");
+      Swal.fire({
+        title: 'Lỗi!',
+        text: 'Có lỗi xảy ra khi xóa yêu cầu.',
+        icon: 'error'
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -196,7 +235,7 @@ const OrderChangeRequestManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-            Quản lý yêu cầu thay đổi đơn hàng
+            Yêu cầu thay đổi thông tin đơn hàng
           </h2>
           <p className="text-gray-600 text-sm">
             Tổng cộng {requests.length} yêu cầu

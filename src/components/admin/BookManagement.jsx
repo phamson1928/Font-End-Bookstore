@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BookForm } from "./BookForm";
 import { api } from "../../api";
 import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
+import Swal from "sweetalert2";
 
 export const BookManagement = () => {
   const [books, setBooks] = useState([]);
@@ -76,24 +77,49 @@ export const BookManagement = () => {
         console.error("[EDIT] Response status:", error.response.status);
         console.error("[EDIT] Response data:", error.response.data);
       }
-      alert("Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.");
+      Swal.fire({
+        title: "Lỗi!",
+        text: "Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.",
+        icon: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteBook = async (bookId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa sách này?")) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: "Xác nhận xóa",
+      text: "Bạn có chắc chắn muốn xóa sách này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await api.delete(`/books/${bookId}`);
-      console.log("Book deleted successfully");
       await fetchBooks();
+
+      Swal.fire({
+        title: "Đã xóa!",
+        text: "Sách đã được xóa thành công.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.error("Error deleting book:", error);
-      alert("Có lỗi xảy ra khi xóa sách. Vui lòng thử lại.");
+      Swal.fire({
+        title: "Lỗi!",
+        text: "Có lỗi xảy ra khi xóa sách.",
+        icon: "error",
+      });
     }
   };
 

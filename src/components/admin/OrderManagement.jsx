@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import api from "../../api/client";
+import Swal from 'sweetalert2';
 import {
   ShoppingBag,
   CheckCircle,
@@ -67,14 +68,32 @@ export const OrderManagement = () => {
   }, [orders]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa đơn hàng này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
+    });
+
+    if (!result.isConfirmed) return;
 
     setLoading(true);
     try {
       await api.delete(`/orders/${id}`);
       setOrders((prev) => prev.filter((order) => order.id !== id));
+      
+      Swal.fire({
+        title: 'Đã xóa!',
+        text: 'Đơn hàng đã được xóa thành công.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (err) {
       console.error(
         "Error deleting order:",
@@ -85,7 +104,11 @@ export const OrderManagement = () => {
           (err.response.data.message || JSON.stringify(err.response.data))) ||
         err?.message ||
         "Xóa đơn hàng thất bại";
-      toast.error(msg);
+      Swal.fire({
+        title: 'Lỗi!',
+        text: msg,
+        icon: 'error'
+      });
     } finally {
       setLoading(false);
     }
