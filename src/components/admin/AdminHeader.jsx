@@ -24,11 +24,11 @@ export const AdminHeader = ({ isSidebarOpen, setIsSidebarOpen }) => {
             </svg>
           </button>
 
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">
-              Admin Dashboard
+          <div className="ml-7">
+            <h1 className="text-xl font-stretch-200% text-gray-900">
+              BOOK STORE
             </h1>
-            <p className="text-sm text-gray-600">Quản lý cửa hàng sách</p>
+            <p className="text-sm text-gray-600">ADMIN PANEL</p>
           </div>
         </div>
 
