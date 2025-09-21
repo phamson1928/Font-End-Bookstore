@@ -21,6 +21,7 @@ import {
   Loader2,
   CheckCircle,
 } from "lucide-react";
+import ZaloPayIcon from "../components/user/ZaloPayIcon";
 
 const CartPage = () => {
   const { items, updateQuantity, removeFromCart, getTotalPrice, clearCart } =
@@ -157,18 +158,17 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
-    if (paymentMethod === "cod") {
-      if (!isValidPhone(phone)) {
-        toast.info(
-          "Vui lòng nhập số điện thoại hợp lệ (10 số, bắt đầu bằng 0)."
-        );
-        return;
-      }
-      if (!address?.trim()) {
-        toast.info("Vui lòng nhập địa chỉ giao hàng.");
-        return;
-      }
-      try {
+    if (!isValidPhone(phone)) {
+      toast.info("Vui lòng nhập số điện thoại hợp lệ (10 số, bắt đầu bằng 0).");
+      return;
+    }
+    if (!address?.trim()) {
+      toast.info("Vui lòng nhập địa chỉ giao hàng.");
+      return;
+    }
+
+    try {
+      if (paymentMethod === "cod") {
         const res = await api.post("/orders", {
           payment_method: paymentMethod,
           phone,
@@ -178,21 +178,40 @@ const CartPage = () => {
         const message = res?.data?.message ?? "Đặt hàng thành công!";
         clearCart();
         toast.success(order?.id ? `${message} Mã đơn: ${order.id}` : message);
-      } catch (err) {
-        console.error("Tạo đơn hàng thất bại:", err);
-        const apiMsg = err?.response?.data?.error || err?.message;
-        toast.error(
-          apiMsg
-            ? `Lỗi khi đặt hàng: ${apiMsg}`
-            : "Lỗi khi đặt hàng. Vui lòng thử lại."
-        );
+      } else if (paymentMethod === "zalopay") {
+        // Tạo đơn hàng trước
+        const orderRes = await api.post("/orders", {
+          payment_method: paymentMethod,
+          phone,
+          address,
+        });
+        const order = orderRes?.data?.order;
+        
+        if (!order?.id) {
+          toast.error("Không thể tạo đơn hàng");
+          return;
+        }
+
+        // Tạo thanh toán ZaloPay
+        const paymentRes = await api.post("/zalopay/create-payment", {
+          order_id: order.id,
+          amount: getTotalPrice() - (storeDiscount > 0 ? Math.round(getTotalPrice() * (storeDiscount / 100)) : 0)
+        });
+        
+        const { order_url } = paymentRes.data;
+        if (order_url) {
+          clearCart();
+          window.location.href = order_url;
+        } else {
+          toast.error("Không thể tạo thanh toán ZaloPay");
+        }
+      } else {
+        toast.info("Vui lòng chọn phương thức thanh toán.");
       }
-    } else if (paymentMethod === "card") {
-      toast.info(
-        "Bạn đã chọn thanh toán bằng thẻ. Tính năng cổng thanh toán sẽ được tích hợp sau."
-      );
-    } else {
-      toast.info("Vui lòng chọn phương thức thanh toán.");
+    } catch (err) {
+      console.error("Lỗi thanh toán:", err);
+      const apiMsg = err?.response?.data?.error || err?.message;
+      toast.error(apiMsg ? `Lỗi: ${apiMsg}` : "Lỗi khi đặt hàng. Vui lòng thử lại.");
     }
   };
 
@@ -559,11 +578,11 @@ const CartPage = () => {
                     <CreditCard className="w-5 h-5 text-blue-600 mr-2" />
                     Phương thức thanh toán
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("cod")}
-                      className={`border-2 rounded-xl p-4 text-left transition-all duration-300 hover:scale-105 ${
+                      className={`w-full border-2 rounded-xl p-4 text-left transition-all duration-300 hover:scale-105 ${
                         paymentMethod === "cod"
                           ? "border-blue-600 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg"
                           : "border-slate-200 hover:bg-slate-50 hover:border-slate-300"
@@ -572,44 +591,33 @@ const CartPage = () => {
                       <div className="flex items-center">
                         <Banknote
                           className={`w-6 h-6 mr-3 ${
-                            paymentMethod === "cod"
-                              ? "text-blue-600"
-                              : "text-green-600"
+                            paymentMethod === "cod" ? "text-blue-600" : "text-green-600"
                           }`}
                         />
                         <div>
-                          <div className="font-bold text-slate-800">
-                            Trực tiếp
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            Thanh toán khi nhận hàng
-                          </div>
+                          <div className="font-bold text-slate-800">Thanh toán khi nhận hàng</div>
+                          <div className="text-xs text-slate-500">Trả tiền mặt khi giao hàng</div>
                         </div>
                       </div>
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("card")}
-                      className={`border-2 rounded-xl p-4 text-left transition-all duration-300 hover:scale-105 ${
-                        paymentMethod === "card"
+                      onClick={() => setPaymentMethod("zalopay")}
+                      className={`w-full border-2 rounded-xl p-4 text-left transition-all duration-300 hover:scale-105 ${
+                        paymentMethod === "zalopay"
                           ? "border-blue-600 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg"
                           : "border-slate-200 hover:bg-slate-50 hover:border-slate-300"
                       }`}
                     >
                       <div className="flex items-center">
-                        <CreditCard
-                          className={`w-6 h-6 mr-3 ${
-                            paymentMethod === "card"
-                              ? "text-blue-600"
-                              : "text-indigo-600"
-                          }`}
+                        <ZaloPayIcon 
+                          className="w-6 h-6 mr-3" 
+                          color={paymentMethod === "zalopay" ? "#0068FF" : "#4F46E5"}
                         />
                         <div>
-                          <div className="font-bold text-slate-800">Thẻ</div>
-                          <div className="text-xs text-slate-500">
-                            Visa / Mastercard
-                          </div>
+                          <div className="font-bold text-slate-800">ZaloPay</div>
+                          <div className="text-xs text-slate-500">Thanh toán online qua ZaloPay</div>
                         </div>
                       </div>
                     </button>
@@ -622,14 +630,12 @@ const CartPage = () => {
                     onClick={handleCheckout}
                     className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105"
                   >
-                    {paymentMethod === "card" ? (
-                      <CreditCard className="w-5 h-5 mr-3" />
+                    {paymentMethod === "zalopay" ? (
+                      <ZaloPayIcon className="w-5 h-5 mr-3" color="white" />
                     ) : (
                       <Banknote className="w-5 h-5 mr-3" />
                     )}
-                    {paymentMethod === "card"
-                      ? "Thanh toán thẻ"
-                      : "Thanh toán COD"}
+                    {paymentMethod === "zalopay" ? "Thanh toán ZaloPay" : "Thanh toán COD"}
                   </button>
 
                   <Link
