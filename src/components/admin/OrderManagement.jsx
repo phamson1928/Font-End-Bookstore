@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import api from "../../api/client";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import {
   ShoppingBag,
   CheckCircle,
@@ -34,6 +34,7 @@ export const OrderManagement = () => {
     state: "",
     address: "",
     phone: "",
+    payment_status: "",
   });
 
   useEffect(() => {
@@ -69,15 +70,15 @@ export const OrderManagement = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: 'Xác nhận xóa',
-      text: 'Bạn có chắc chắn muốn xóa đơn hàng này?',
-      icon: 'warning',
+      title: "Xác nhận xóa",
+      text: "Bạn có chắc chắn muốn xóa đơn hàng này?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy',
-      reverseButtons: true
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
@@ -86,13 +87,13 @@ export const OrderManagement = () => {
     try {
       await api.delete(`/orders/${id}`);
       setOrders((prev) => prev.filter((order) => order.id !== id));
-      
+
       Swal.fire({
-        title: 'Đã xóa!',
-        text: 'Đơn hàng đã được xóa thành công.',
-        icon: 'success',
+        title: "Đã xóa!",
+        text: "Đơn hàng đã được xóa thành công.",
+        icon: "success",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } catch (err) {
       console.error(
@@ -105,9 +106,9 @@ export const OrderManagement = () => {
         err?.message ||
         "Xóa đơn hàng thất bại";
       Swal.fire({
-        title: 'Lỗi!',
+        title: "Lỗi!",
         text: msg,
-        icon: 'error'
+        icon: "error",
       });
     } finally {
       setLoading(false);
@@ -127,6 +128,7 @@ export const OrderManagement = () => {
                 state: formData.state,
                 address: formData.address,
                 phone: formData.phone,
+                payment_status: formData.payment_status,
               }
             : o
         )
@@ -159,6 +161,7 @@ export const OrderManagement = () => {
       state: order?.state || "Chờ xác nhận",
       address: order?.address || "",
       phone: order?.phone || "",
+      payment_status: order?.payment_status || "Chưa thanh toán",
     });
     setShowModal(true);
   };
@@ -195,6 +198,32 @@ export const OrderManagement = () => {
         return <X size={12} className="mr-1" />;
       default:
         return <Clock size={12} className="mr-1" />;
+    }
+  };
+
+  const getPaymentStatusColor = (status) => {
+    switch (status) {
+      case "Đã thanh toán":
+        return "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 shadow-sm";
+      case "Chưa thanh toán":
+        return "bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border border-rose-200 shadow-sm";
+      case "Đang xử lý":
+        return "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200 shadow-sm";
+      default:
+        return "bg-gradient-to-r from-slate-50 to-gray-50 text-slate-700 border border-slate-200 shadow-sm";
+    }
+  };
+
+  const getPaymentStatusIcon = (status) => {
+    switch (status) {
+      case "Đã thanh toán":
+        return <CheckCircle size={12} className="mr-1" />;
+      case "Chưa thanh toán":
+        return <X size={12} className="mr-1" />;
+      case "Đang xử lý":
+        return <Clock size={12} className="mr-1" />;
+      default:
+        return <CreditCard size={12} className="mr-1" />;
     }
   };
 
@@ -365,14 +394,24 @@ export const OrderManagement = () => {
                             #{order.id}
                           </span>
                         </div>
-                        <span
-                          className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-xl ${getStatusColor(
-                            order.state
-                          )}`}
-                        >
-                          {getStatusIcon(order.state)}
-                          {order.state}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-xl ${getStatusColor(
+                              order.state
+                            )}`}
+                          >
+                            {getStatusIcon(order.state)}
+                            {order.state}
+                          </span>
+                          <span
+                            className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-xl ${getPaymentStatusColor(
+                              order.payment_status
+                            )}`}
+                          >
+                            {getPaymentStatusIcon(order.payment_status)}
+                            {order.payment_status}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
@@ -537,7 +576,16 @@ export const OrderManagement = () => {
                             <div className="flex items-center text-slate-600">
                               <CreditCard size={16} className="mr-2" />
                               <span className="font-medium">
-                                Thanh toán: {order.payment_method}
+                                Thanh toán: {order.payment_method} - 
+                                <span className={`font-bold ${
+                                  order.payment_status === "Đã thanh toán" 
+                                    ? "text-emerald-600" 
+                                    : order.payment_status === "Chưa thanh toán"
+                                    ? "text-rose-600"
+                                    : "text-amber-600"
+                                }`}>
+                                  {order.payment_status}
+                                </span>
                               </span>
                             </div>
                             <div className="flex items-center text-slate-600">
@@ -654,21 +702,37 @@ export const OrderManagement = () => {
 
                 {/* Form */}
                 <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                      Trạng thái đơn hàng
-                    </label>
-                    <select
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium"
-                    >
-                      <option value="Chờ xác nhận">Chờ xác nhận</option>
-                      <option value="Đang vận chuyển">Đang vận chuyển</option>
-                      <option value="Đã giao">Đã giao</option>
-                      <option value="Đã hủy">Đã hủy</option>
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Trạng thái đơn hàng
+                      </label>
+                      <select
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium"
+                      >
+                        <option value="Chờ xác nhận">Chờ xác nhận</option>
+                        <option value="Đang vận chuyển">Đang vận chuyển</option>
+                        <option value="Đã giao">Đã giao</option>
+                        <option value="Đã hủy">Đã hủy</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">
+                        Trạng thái thanh toán
+                      </label>
+                      <select
+                        name="payment_status"
+                        value={formData.payment_status}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-slate-700 font-medium"
+                      >
+                        <option value="Chưa thanh toán">Chưa thanh toán</option>
+                        <option value="Đã thanh toán">Đã thanh toán</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
