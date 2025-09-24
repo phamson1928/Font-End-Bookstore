@@ -20,6 +20,7 @@ import {
   CreditCard,
   Tag,
   TrendingUp,
+  TicketPlusIcon,
 } from "lucide-react";
 
 export const OrderManagement = () => {
@@ -190,8 +191,8 @@ export const OrderManagement = () => {
     switch (status) {
       case "Đã giao":
         return <CheckCircle size={12} className="mr-1" />;
-      case "Đang xử lý":
-        return <Clock size={12} className="mr-1" />;
+      case "Đã xác nhận":
+        return <TicketPlusIcon size={12} className="mr-1" />;
       case "Đang vận chuyển":
         return <Package size={12} className="mr-1" />;
       case "Đã hủy":
@@ -207,8 +208,6 @@ export const OrderManagement = () => {
         return "bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 shadow-sm";
       case "Chưa thanh toán":
         return "bg-gradient-to-r from-rose-50 to-red-50 text-rose-700 border border-rose-200 shadow-sm";
-      case "Đang xử lý":
-        return "bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border border-amber-200 shadow-sm";
       default:
         return "bg-gradient-to-r from-slate-50 to-gray-50 text-slate-700 border border-slate-200 shadow-sm";
     }
@@ -220,8 +219,6 @@ export const OrderManagement = () => {
         return <CheckCircle size={12} className="mr-1" />;
       case "Chưa thanh toán":
         return <X size={12} className="mr-1" />;
-      case "Đang xử lý":
-        return <Clock size={12} className="mr-1" />;
       default:
         return <CreditCard size={12} className="mr-1" />;
     }
@@ -576,14 +573,17 @@ export const OrderManagement = () => {
                             <div className="flex items-center text-slate-600">
                               <CreditCard size={16} className="mr-2" />
                               <span className="font-medium">
-                                Thanh toán: {order.payment_method} - 
-                                <span className={`font-bold ${
-                                  order.payment_status === "Đã thanh toán" 
-                                    ? "text-emerald-600" 
-                                    : order.payment_status === "Chưa thanh toán"
-                                    ? "text-rose-600"
-                                    : "text-amber-600"
-                                }`}>
+                                Thanh toán: {order.payment_method} -
+                                <span
+                                  className={`font-bold ${
+                                    order.payment_status === "Đã thanh toán"
+                                      ? "text-emerald-600"
+                                      : order.payment_status ===
+                                        "Chưa thanh toán"
+                                      ? "text-rose-600"
+                                      : "text-amber-600"
+                                  }`}
+                                >
                                   {order.payment_status}
                                 </span>
                               </span>
@@ -715,6 +715,7 @@ export const OrderManagement = () => {
                       >
                         <option value="Chờ xác nhận">Chờ xác nhận</option>
                         <option value="Đang vận chuyển">Đang vận chuyển</option>
+                        <option value="Đã xác nhận">Đã xác nhận</option>
                         <option value="Đã giao">Đã giao</option>
                         <option value="Đã hủy">Đã hủy</option>
                       </select>
