@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useCart } from "../../contexts/CartContext";
 import { getImageUrl, getBookPlaceholder } from "../../utils/imageUtils";
+import { getToken } from "../../api";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,6 +28,13 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
   };
 
   const handleAddToCart = () => {
+    const token = getToken();
+    if (!token) {
+      toast.info("Vui lòng đăng nhập hoặc đăng ký nếu chưa có tài khoản để thêm sách vào giỏ hàng!", {
+        autoClose: 3000,
+      });
+      return;
+    }
     addToCart(book, quantity);
     toast.success(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng!`, {
       autoClose: 1600,
@@ -35,6 +43,13 @@ export const BookDetailModal = ({ isOpen, onClose, book }) => {
   };
 
   const handleBuyNow = () => {
+    const token = getToken();
+    if (!token) {
+      toast.info("Vui lòng đăng nhập hoặc đăng ký nếu chưa có tài khoản để mua sách!", {
+        autoClose: 3000,
+      });
+      return;
+    }
     addToCart(book, quantity);
     navigate("/cart");
     onClose();
