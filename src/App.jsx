@@ -17,11 +17,12 @@ const App = () => {
   // Tạo ping server để cập nhật trạng thái online
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (!token) return;
+    
     const pingServer = async () => {
       try {
         await api.post("/ping", {});
-        console.log("✅ User online status updated");
       } catch (error) {
         console.error(
           "❌ Failed to update online status:",
@@ -30,8 +31,9 @@ const App = () => {
         );
       }
     };
-    pingServer();
-    const pingInterval = setInterval(pingServer, 2 * 60 * 1000);
+    
+    pingServer(); // Ping ngay lập tức
+    const pingInterval = setInterval(pingServer, 2 * 60 * 1000); // Ping mỗi 2 phút
     return () => clearInterval(pingInterval);
   }, []);
 
