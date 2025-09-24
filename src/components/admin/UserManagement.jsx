@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api/client";
 import dayjs from "dayjs";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import {
   Users,
   UserCheck,
@@ -46,6 +46,7 @@ export const UserManagement = () => {
         setLoading(true);
         const res = await api.get("/user-index");
         setUsers(res.data);
+
       } catch (err) {
         console.error(
           "Error fetching users:",
@@ -57,33 +58,40 @@ export const UserManagement = () => {
     };
 
     fetchUsers();
+    
+    // Auto-refresh mỗi 30 giây để cập nhật trạng thái
+    const refreshInterval = setInterval(() => {
+      fetchUsers();
+    }, 30 * 1000);
+    
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const handleDeleteClick = async (user) => {
     const result = await Swal.fire({
-      title: 'Xác nhận xóa',
+      title: "Xác nhận xóa",
       html: `Bạn có chắc chắn muốn xóa người dùng<br><strong>${user.name}</strong>?`,
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy',
-      reverseButtons: true
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      const response = await api.delete(`/user-delete/${user.id}`);
+      await api.delete(`/user-delete/${user.id}`);
       setUsers((prev) => prev.filter((u) => u.id !== user.id));
-      
+
       Swal.fire({
-        title: 'Đã xóa!',
-        text: 'Người dùng đã được xóa thành công.',
-        icon: 'success',
+        title: "Đã xóa!",
+        text: "Người dùng đã được xóa thành công.",
+        icon: "success",
         timer: 2000,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } catch (err) {
       console.error(
@@ -91,9 +99,9 @@ export const UserManagement = () => {
         err?.response?.data || err?.message || err
       );
       Swal.fire({
-        title: 'Lỗi!',
-        text: 'Có lỗi xảy ra khi xóa người dùng.',
-        icon: 'error'
+        title: "Lỗi!",
+        text: "Có lỗi xảy ra khi xóa người dùng.",
+        icon: "error",
       });
     }
   };
@@ -105,9 +113,26 @@ export const UserManagement = () => {
   };
 
   const getStatusColor = (last_seen) => {
-    return last_seen
+    if (!last_seen) return "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300";
+    
+    const lastSeenTime = new Date(last_seen.replace(' ', 'T') + (last_seen.includes('Z') ? '' : 'Z'));
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const isOnline = lastSeenTime > fiveMinutesAgo;
+    
+    return isOnline
       ? "bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border border-emerald-300"
       : "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-300";
+  };
+
+  const getStatusText = (last_seen) => {
+    if (!last_seen) return "Offline";
+    
+    // Sửa timezone issue: thêm 'Z' để parse đúng UTC hoặc dùng local time
+    const lastSeenTime = new Date(last_seen.replace(' ', 'T') + (last_seen.includes('Z') ? '' : 'Z'));
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const isOnline = lastSeenTime > fiveMinutesAgo;
+    
+    return isOnline ? "Online" : "Offline";
   };
 
   if (loading) {
@@ -271,6 +296,9 @@ export const UserManagement = () => {
                     Tham gia
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Lần cuối đăng nhập
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Thao tác
                   </th>
                 </tr>
@@ -319,12 +347,17 @@ export const UserManagement = () => {
                         )}`}
                       >
                         <Activity size={10} className="mr-1" />
-                        {user.last_seen ? "Hoạt động" : "Offline"}
+                        {getStatusText(user.last_seen)}
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <div className="text-sm text-slate-600 font-medium">
-                        {dayjs(user.created_at).format("DD/MM/YY")}
+                        {dayjs(user.created_at).add(7, 'hour').format("DD/MM/YY")}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="text-sm text-slate-600 font-medium">
+                        {user.last_login_at ? dayjs(user.last_login_at).add(7, 'hour').format("DD/MM/YY HH:mm") : "Chưa đăng nhập"}
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
@@ -343,8 +376,6 @@ export const UserManagement = () => {
           </div>
         </div>
       </div>
-
-
     </div>
   );
 };
